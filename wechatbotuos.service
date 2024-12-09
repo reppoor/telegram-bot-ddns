@@ -1,0 +1,13 @@
+[Unit]
+Description=WeChatBotUOS Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/etc/wechatbot/cmd/main
+Restart=always
+User=root
+WorkingDirectory=/etc/wechatbot/cmd
+
+[Install]
+WantedBy=multi-user.target
