@@ -124,7 +124,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, _ = bot.Send(msg)
 					return
 				}
-				newIP, err := services.ResolveDomainToIP(DomainInfo.Domain) //获取IP
+				newIP, err := services.ResolveDomainToIP(DomainInfo.ForwardingDomain) //获取转发IP
 				if err != nil {
 					fmt.Println("获取IP失败", err)
 					// 格式化消息内容，使用 Markdown 格式
@@ -207,7 +207,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, _ = bot.Send(msg)
 					return
 				}
-				newIP, err := services.ResolveDomainToIP(DomainInfo.Domain) //获取IP
+				newIP, err := services.ResolveDomainToIP(DomainInfo.ForwardingDomain) //获取IP
 				if err != nil {
 					fmt.Println("获取IP失败", err)
 					// 格式化消息内容，使用 Markdown 格式

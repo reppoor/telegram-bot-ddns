@@ -38,7 +38,8 @@ func GenerateMainMenuKeyboard(domainMap map[string]map[string]map[string]interfa
 		for forwardingDomain, details := range forwardingMap {
 			// 提取端口信息并格式化按钮文本
 			port := details["Port"]
-			buttonText := fmt.Sprintf("%s - %s - %v", domainName, forwardingDomain, port)
+			ban, _ := details["Ban"].(bool)
+			buttonText := fmt.Sprintf("%s - %s - %v - 封禁【%t】", domainName, forwardingDomain, port, ban)
 
 			// 将回调数据设置为例如 ID
 			callbackData := fmt.Sprintf("%v", details["ID"])
