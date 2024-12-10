@@ -1,12 +1,15 @@
 package bot
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"net/http"
 	"net/url"
 	"telegrambot/config"
 	"telegrambot/internal/bot/handlers"
+	"telegrambot/internal/services"
+	"time"
 )
 
 func TelegramApp() {
@@ -43,9 +46,29 @@ func TelegramApp() {
 	updates := bot.GetUpdatesChan(u) // 获取更新通道
 	// 在这里可以安全使用 bot 变量
 	log.Printf("已授权账户: %s", bot.Self.UserName)
+	// 创建一个单独的 Goroutine 用于定时任务
+	go func() {
+		ticker := time.NewTicker(10 * time.Minute)
+		defer ticker.Stop() // 确保程序退出时停止Ticker
+		for {
+			select {
+			case <-ticker.C:
+				// 创建一个模拟的 Update 对象
+				up := tgbotapi.Update{
+					Message: &tgbotapi.Message{
+						Chat: &tgbotapi.Chat{
+							ID: Config.Telegram.Id, // 指定目标 Chat ID
+						},
+					},
+				}
+				fmt.Println("定时检测任务启动")
+				services.ALLCheckTCPConnectivity(bot, up, false)
+			}
+		}
+	}()
+
 	//轮询消息
 	for update := range updates {
-
 		// 异步处理回调查询
 		if update.CallbackQuery != nil {
 			go handlers.CallbackQuery(bot, update, Config)
@@ -58,4 +81,5 @@ func TelegramApp() {
 			continue
 		}
 	}
+
 }
