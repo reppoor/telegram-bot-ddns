@@ -70,9 +70,9 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, err = bot.Send(msg)
 			return
 		}
-		keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+		keyBoard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "查询转发信息")
-		msg.ReplyMarkup = keyboard
+		msg.ReplyMarkup = keyBoard
 		// 发送消息
 		_, err = bot.Send(msg)
 	case "check":
