@@ -89,12 +89,12 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, err = bot.Send(msg)
 					return
 				}
-				keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+				keyBoard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 				msg = tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID, // 原始消息的聊天 ID
 					update.CallbackQuery.Message.MessageID,
 					"记录删除成功✅️") // 要编辑的消息的 ID
-				msg.ReplyMarkup = &keyboard
+				msg.ReplyMarkup = &keyBoard
 				// 发送消息
 				_, err = bot.Send(msg)
 			case "parse":
@@ -378,12 +378,12 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, err = bot.Send(msg)
 					return
 				}
-				keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+				keyBoard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 				msg := tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID, // 原始消息的聊天 ID
 					update.CallbackQuery.Message.MessageID,
 					"查询转发信息") // 要编辑的消息的 ID
-				msg.ReplyMarkup = &keyboard
+				msg.ReplyMarkup = &keyBoard
 				// 发送消息
 				_, err = bot.Send(msg)
 			case "exit":
