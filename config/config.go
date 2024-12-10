@@ -51,7 +51,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	rootDir, err := findProjectRoot(workingDir)
 	if err != nil {
 		fmt.Println("错误:", err)
-		return nil, fmt.Errorf("错误:", err)
+		return nil, fmt.Errorf("错误:%s", err)
 	}
 	//filePath = filepath.Join(filepath.Dir(rootDir), "conf.yaml") // 默认文件名
 	//fmt.Println(rootDir + "/conf.yaml") //打印conf.yaml路径情况，进行调试

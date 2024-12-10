@@ -45,6 +45,7 @@ func TelegramApp() {
 	log.Printf("已授权账户: %s", bot.Self.UserName)
 	//轮询消息
 	for update := range updates {
+
 		// 异步处理回调查询
 		if update.CallbackQuery != nil {
 			go handlers.CallbackQuery(bot, update, Config)

@@ -179,7 +179,6 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				// 创建按钮
 				msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
 				_, err = bot.Send(msg)
-
 			case "checkAndParse":
 				// 检测连通性并解析记录
 				fmt.Println("执行检测连通性并解析记录, ID:", ID)
@@ -287,7 +286,83 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, err = bot.Send(msg)
 			case "ban":
 				// 处理封禁操作
-				fmt.Println("执行封禁操作, ID:", ID)
+				fmt.Println("执行封禁或启用操作, ID:", data)
+				db.InitDB() //连接数据库
+				DomainInfo, err := repository.GetDomainIDInfo(data)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				Ban := DomainInfo.Ban
+				if Ban {
+					newBanStatus := !DomainInfo.Ban
+					_, err := repository.UpdateDomainBan(data, newBanStatus)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					DomainInfo, err := repository.GetDomainIDInfo(data)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					ID := DomainInfo.ID
+					Domain := DomainInfo.Domain
+					ForwardingDomain := DomainInfo.ForwardingDomain
+					IP := DomainInfo.IP
+					Port := DomainInfo.Port
+					ISP := DomainInfo.ISP
+					Ban := DomainInfo.Ban
+					// 格式化消息内容，使用 Markdown 格式
+					messageText := fmt.Sprintf(
+						"*已解除封禁✅️*\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`",
+						ID, Domain, ForwardingDomain, IP, Port, ISP, Ban,
+					) // 格式化消息内容，使用 Markdown 格式
+					fmt.Println(messageText)
+					msg := tgbotapi.NewEditMessageText(
+						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+						update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+						messageText,                            // 新的消息文本
+					)
+					msg.ParseMode = "Markdown"
+					// 创建按钮
+					msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+					_, err = bot.Send(msg)
+				} else {
+					newBanStatus := !DomainInfo.Ban
+					_, err := repository.UpdateDomainBan(data, newBanStatus)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					DomainInfo, err := repository.GetDomainIDInfo(data)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					ID := DomainInfo.ID
+					Domain := DomainInfo.Domain
+					ForwardingDomain := DomainInfo.ForwardingDomain
+					IP := DomainInfo.IP
+					Port := DomainInfo.Port
+					ISP := DomainInfo.ISP
+					Ban := DomainInfo.Ban
+					// 格式化消息内容，使用 Markdown 格式
+					messageText := fmt.Sprintf(
+						"*已封禁🚫*\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`",
+						ID, Domain, ForwardingDomain, IP, Port, ISP, Ban,
+					) // 格式化消息内容，使用 Markdown 格式
+					fmt.Println(messageText)
+					msg := tgbotapi.NewEditMessageText(
+						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+						update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+						messageText,                            // 新的消息文本
+					)
+					msg.ParseMode = "Markdown"
+					// 创建按钮
+					msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+					_, err = bot.Send(msg)
+				}
 			case "back":
 				// 处理退出操作
 				fmt.Println("返回操作, ID:", ID)
