@@ -94,5 +94,6 @@ func UpdateARecord(fullDomain, ip string) (string string, err error) {
 	}
 	// 如果找不到匹配的 Zone ID，返回错误
 	//return fmt.Errorf("未找到子域名 %s 对应的 Zone ID", fullDomain)
+	fmt.Printf("域名解析成功")
 	return "域名解析成功", nil
 }

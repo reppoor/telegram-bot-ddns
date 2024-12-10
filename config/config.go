@@ -25,8 +25,9 @@ type Config struct {
 	} `yaml:"cloudflare"`
 
 	Telegram struct {
-		Id    int64  `yaml:"id"`    // telegram机器人token
-		Token string `yaml:"token"` // telegram机器人token
+		Id          int64  `yaml:"id"`          // telegram机器人ID
+		Token       string `yaml:"token"`       // telegram机器人token
+		ApiEndpoint string `yaml:"apiEndpoint"` // telegramAPI
 	} `yaml:"telegram"`
 
 	Network struct {

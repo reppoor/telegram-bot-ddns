@@ -1,0 +1,19 @@
+database:
+    user: ""           # 数据库用户名
+    password: ""   # 数据库密码
+    host: ""          # 数据库主机
+    port: "3306"                   # 数据库端口
+    name: ""           # 数据库名称
+    charset: "utf8mb4"             # 字符集
+
+telegram:
+  id :  #telegram用户ID
+  token : "" # telegram机器人Token找@BotFather创建
+  apiEndpoint: "https://api.telegram.org" #telegramAPI 可以反代，如果不知道在做什么，请不要更改
+
+cloudflare:
+  email: ""               #cloudflare的email
+  key: ""  #cloudflare的key
+
+network:
+    proxy: "http://127.0.0.1:7890" #配置代理

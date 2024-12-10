@@ -28,7 +28,7 @@ func TelegramApp() {
 				Proxy: http.ProxyURL(proxyURL),
 			},
 		}
-		bot, err = tgbotapi.NewBotAPIWithClient(Config.Telegram.Token, "https://api.telegram.org/bot%s/%s", httpClient)
+		bot, err = tgbotapi.NewBotAPIWithClient(Config.Telegram.Token, Config.Telegram.ApiEndpoint+"/bot%s/%s", httpClient)
 		if err != nil {
 			log.Panic(err)
 		}
