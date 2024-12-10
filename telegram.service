@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/etc/telegram/cmd/main
+ExecStart=/etc/telegrambot/cmd/main
 Restart=always
 User=root
-WorkingDirectory=/etc/telegram/cmd
+WorkingDirectory=/etc/telegrambot/cmd
 
 [Install]
 WantedBy=multi-user.target

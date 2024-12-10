@@ -4,7 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"telegrambot/config"
-	"telegrambot/internal/bot/Keyboard"
+	"telegrambot/internal/bot/keyboard"
 	"telegrambot/internal/db"
 	"telegrambot/internal/db/repository"
 	"telegrambot/internal/services"
@@ -70,7 +70,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, err = bot.Send(msg)
 			return
 		}
-		keyboard := Keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+		keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "查询转发信息")
 		msg.ReplyMarkup = keyboard
 		// 发送消息

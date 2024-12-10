@@ -1,4 +1,4 @@
-package Keyboard
+package keyboard
 
 import (
 	"fmt"
@@ -18,6 +18,7 @@ type InlineKeyboard struct {
 
 func createInlineKeyboard(keyboard InlineKeyboard) tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
+
 	// 使用 keyboard.Buttons 替代 buttons
 	for _, buttonRow := range keyboard.Buttons {
 		var row []tgbotapi.InlineKeyboardButton
@@ -27,6 +28,11 @@ func createInlineKeyboard(keyboard InlineKeyboard) tgbotapi.InlineKeyboardMarkup
 		}
 		rows = append(rows, row)
 	}
+
+	// 创建退出按钮并添加到最后一行
+	exitButton := tgbotapi.NewInlineKeyboardButtonData("退出🔚", "1-exit")
+	rows = append(rows, []tgbotapi.InlineKeyboardButton{exitButton})
+
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
 

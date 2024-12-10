@@ -5,7 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	"telegrambot/config"
-	"telegrambot/internal/bot/Keyboard"
+	"telegrambot/internal/bot/keyboard"
 	"telegrambot/internal/db"
 	"telegrambot/internal/db/repository"
 	"telegrambot/internal/services"
@@ -45,7 +45,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		)
 		msg.ParseMode = "Markdown"
 		// 创建按钮
-		msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+		msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 		_, err = bot.Send(msg)
 		fmt.Println("当前是1级菜单")
 	case 2:
@@ -89,7 +89,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, err = bot.Send(msg)
 					return
 				}
-				keyboard := Keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+				keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 				msg = tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID, // 原始消息的聊天 ID
 					update.CallbackQuery.Message.MessageID,
@@ -177,7 +177,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				)
 				msg.ParseMode = "Markdown"
 				// 创建按钮
-				msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+				msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 				_, err = bot.Send(msg)
 			case "checkAndParse":
 				// 检测连通性并解析记录
@@ -281,7 +281,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				)
 				msg.ParseMode = "Markdown"
 				// 创建键盘布局
-				msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+				msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 				//发送消息
 				_, err = bot.Send(msg)
 			case "ban":
@@ -326,7 +326,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					)
 					msg.ParseMode = "Markdown"
 					// 创建按钮
-					msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 					_, err = bot.Send(msg)
 				} else {
 					newBanStatus := !DomainInfo.Ban
@@ -360,7 +360,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					)
 					msg.ParseMode = "Markdown"
 					// 创建按钮
-					msg.ReplyMarkup = Keyboard.GenerateSubMenuKeyboard(ID, Ban)
+					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 					_, err = bot.Send(msg)
 				}
 			case "back":
@@ -378,7 +378,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, err = bot.Send(msg)
 					return
 				}
-				keyboard := Keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
+				keyboard := keyboard.GenerateMainMenuKeyboard(DomainInfo) //生成内联键盘
 				msg := tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID, // 原始消息的聊天 ID
 					update.CallbackQuery.Message.MessageID,

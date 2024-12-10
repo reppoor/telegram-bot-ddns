@@ -1,19 +1,19 @@
 database:
-  user: ""           # 数据库用户名
-  password: ""   # 数据库密码
-  host: ""          # 数据库主机
+  user: "telegramddns"           # 数据库用户名
+  password: "yBySHRLSrcYNhbeX"   # 数据库密码
+  host: "116.205.163.0"          # 数据库主机
   port: "3306"                   # 数据库端口
-  name: ""           # 数据库名称
+  name: "telegramddns"           # 数据库名称
   charset: "utf8mb4"             # 字符集
 
 telegram:
-  id :  #telegram用户ID
-  token : "" # telegram机器人Token找@BotFather创建
+  id : 5674376779 #telegram用户ID
+  token : "8099107021:AAEG5CnQboqmgxnsbskuV0xV6JCr1QfZP4M" # telegram机器人Token找@BotFather创建
   apiEndpoint: "https://api.telegram.org" #telegramAPI 可以反代，如果不知道在做什么，请不要更改
 
 cloudflare:
-  email: ""               #cloudflare的email
-  key: ""  #cloudflare的key
+  email: "github000123@gmail.com"               #cloudflare的email
+  key: "5fb49ee3f9b7b977215d434e6dbf68609c79d"  #cloudflare的key
 
 network:
   proxy: "http://127.0.0.1:7890" #配置代理
