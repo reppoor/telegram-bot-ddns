@@ -1,13 +1,13 @@
 [Unit]
-Description=WeChatBotUOS Service
+Description=telegram Service
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/etc/wechatbot/cmd/main
+ExecStart=/etc/telegram/cmd/main
 Restart=always
 User=root
-WorkingDirectory=/etc/wechatbot/cmd
+WorkingDirectory=/etc/telegram/cmd
 
 [Install]
 WantedBy=multi-user.target
