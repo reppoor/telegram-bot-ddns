@@ -1,11 +1,16 @@
 package bot
 
 import (
+	"context"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"golang.org/x/net/proxy"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
+	"strings"
+
 	"telegrambot/config"
 	"telegrambot/internal/bot/handlers"
 	"telegrambot/internal/services"
@@ -19,17 +24,42 @@ func TelegramApp() {
 		log.Fatalf("加载配置文件失败: %v", err)
 	}
 	var bot *tgbotapi.BotAPI
-	if Config.Network.Proxy != "" {
-		// 创建支持代理的 HTTP 客户端
+	// 假设 Config.Network.Proxy 是代理地址，Config.Network.EnableProxy 是是否启用代理
+	if Config.Network.EnableProxy {
+		var httpClient *http.Client
 		proxyURL, err := url.Parse(Config.Network.Proxy)
 		if err != nil {
 			log.Fatalf("解析代理地址失败: %v", err)
 		}
 
-		httpClient := &http.Client{
-			Transport: &http.Transport{
-				Proxy: http.ProxyURL(proxyURL),
-			},
+		// 判断代理类型，HTTP 或 SOCKS5
+		if strings.HasPrefix(proxyURL.Scheme, "http") {
+			fmt.Println("使用http代理建立telegram连接")
+			// 如果是 HTTP 代理
+			httpClient = &http.Client{
+				Transport: &http.Transport{
+					Proxy: http.ProxyURL(proxyURL),
+				},
+			}
+		} else if strings.HasPrefix(proxyURL.Scheme, "socks5") {
+			fmt.Println("使用socks5代理建立telegram连接")
+			// 如果是 SOCKS5 代理
+			dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, nil, proxy.Direct)
+			if err != nil {
+				log.Fatalf("创建 SOCKS5 代理失败: %v", err)
+			}
+
+			// 包装 dialer.Dial 成一个支持 DialContext 的方法
+			httpClient = &http.Client{
+				Transport: &http.Transport{
+					DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+						// 使用代理的 Dial 方法
+						return dialer.Dial(network, address)
+					},
+				},
+			}
+		} else {
+			log.Fatalf("不支持的代理类型: %s", proxyURL.Scheme)
 		}
 		bot, err = tgbotapi.NewBotAPIWithClient(Config.Telegram.Token, Config.Telegram.ApiEndpoint+"/bot%s/%s", httpClient)
 		if err != nil {

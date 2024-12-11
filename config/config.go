@@ -31,7 +31,10 @@ type Config struct {
 	} `yaml:"telegram"`
 
 	Network struct {
-		Proxy string `yaml:"proxy"` // 网络代理
+		EnableProxy      bool     `yaml:"enable_proxy"`       // 是否启用telegram代理
+		Proxy            string   `yaml:"proxy"`              // telegram网络代理地址
+		EnableCheckProxy bool     `yaml:"enable_check_proxy"` // 是否启用检测代理
+		CheckProxy       []string `yaml:"check_proxy"`        // 检测代理地址
 	} `yaml:"network"`
 }
 
