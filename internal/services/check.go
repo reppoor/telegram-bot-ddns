@@ -1,9 +1,13 @@
 package services
 
 import (
+	"context"
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -12,22 +16,85 @@ import (
 	"time"
 )
 
-// CheckTCPConnectivity 对指定地址进行5次TCP连接测试，如果至少一次成功，则返回true，否则返回false
+// 尝试通过代理进行连接，如果失败则返回错误
+func tryConnectWithProxy(address string, proxyURL *url.URL) (bool, error) {
+	// 创建 HTTP Transport，使用代理
+	transport := &http.Transport{
+		Proxy: http.ProxyURL(proxyURL),
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			// 设置连接超时
+			dialer := &net.Dialer{
+				Timeout: 3 * time.Second, // 设置连接超时为 3 秒
+			}
+			return dialer.DialContext(ctx, network, addr)
+		},
+	}
+
+	// 创建 HTTP 客户端，并使用上面的 Transport
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   5 * time.Second, // 设置整个请求的超时
+	}
+
+	// 尝试通过 HTTP 请求检测连接
+	resp, err := client.Get(fmt.Sprintf("http://%s", address))
+	if err == nil {
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+		return true, nil
+	}
+
+	return false, err
+}
+
+// 尝试直接连接目标地址
+func tryDirectConnection(address string) bool {
+	conn, err := net.DialTimeout("tcp", address, 3*time.Second)
+	if err == nil {
+		_ = conn.Close() // 关闭连接
+		return true
+	}
+	return false
+}
+
 func CheckTCPConnectivity(ip string, port int) bool {
 	address := fmt.Sprintf("%s:%d", ip, port)
 	success := false
 
-	for i := 0; i < 5; i++ {
-		conn, err := net.DialTimeout("tcp", address, 3*time.Second)
-		if err == nil {
-			success = true
-			_ = conn.Close() // 关闭连接
-			fmt.Printf("IP检测正常:%s\n", ip)
-			break // 如果成功一次就可以退出循环
-		}
-		time.Sleep(1 * time.Second) // 每次尝试间隔1秒
-		fmt.Printf("IP检测异常:%s---异常次数:%d\n", ip, i+1)
+	// 代理服务器的 URL（根据你的需求修改此代理地址）
+	proxyURL, err := url.Parse("http://127.0.0.1:7890") // 替换为实际代理地址
+	if err != nil {
+		fmt.Println("代理地址无效:", err)
+		return false
 	}
+
+	// 尝试使用代理进行连接
+	for i := 0; i < 5; i++ {
+		// 尝试通过代理连接
+		proxySuccess, proxyErr := tryConnectWithProxy(address, proxyURL)
+		if proxySuccess {
+			success = true
+			fmt.Printf("通过代理检测正常:%s\n", ip)
+			break
+		} else {
+			// 如果代理连接失败，尝试直接连接
+			fmt.Printf("代理连接失败，尝试直连: %v\n", proxyErr)
+
+			directSuccess := tryDirectConnection(address)
+			if directSuccess {
+				success = true
+				fmt.Printf("IP检测正常(直连): %s\n", ip)
+				break
+			} else {
+				fmt.Printf("直连失败:%s---异常次数:%d\n", ip, i+1)
+			}
+		}
+
+		// 每次尝试间隔1秒
+		time.Sleep(1 * time.Second)
+	}
+
 	return success
 }
 
