@@ -24,8 +24,7 @@ func TelegramApp() {
 		proxyURL, err := url.Parse(Config.Network.Proxy)
 		if err != nil {
 			log.Fatalf("解析代理地址失败: %v", err)
-		}
-
+		} //同时退出程序
 		httpClient := &http.Client{
 			Transport: &http.Transport{
 				Proxy: http.ProxyURL(proxyURL),
@@ -36,7 +35,7 @@ func TelegramApp() {
 			log.Panic(err)
 		}
 	} else {
-		bot, err = tgbotapi.NewBotAPI(Config.Telegram.Token)
+		bot, err = tgbotapi.NewBotAPIWithAPIEndpoint(Config.Telegram.Token, Config.Telegram.ApiEndpoint+"/bot%s/%s")
 		if err != nil {
 			log.Panic(err)
 		}
