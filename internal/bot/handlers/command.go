@@ -60,6 +60,13 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		// 编辑消息
 		_, _ = bot.Send(editMsg)
 	case "info":
+		if ID != Config.Telegram.Id {
+			messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+			msg.ParseMode = "Markdown"
+			_, _ = bot.Send(msg)
+			return
+		}
 		db.InitDB()
 		DomainInfo, err := repository.GetDomainInfo()
 		if err != nil {
