@@ -9,7 +9,7 @@ database:
 telegram:
   id :  #telegram用户ID
   token : "" # telegram机器人Token找@BotFather创建
-  apiEndpoint: "" #telegramAPI 可以反代，如果不知道在做什么，请不要更改
+  apiEndpoint: "https://api.telegram.org"                  #telegramAPI 可以反代，如果不知道在做什么，请不要更改
 
 cloudflare:
   email: ""               #cloudflare的email
@@ -17,7 +17,4 @@ cloudflare:
 
 network:
   enable_proxy: true # 开启后一定要保证语法正确，否则程序报错
-  proxy: "" #配置telegram代理，支持http和socks5。示例语法 socks5://127.0.0.1:7890
-  enable_check_proxy: false # 是否启用检测代理功能，true 表示启用，false 表示禁用，开启后一定要保证语法正确，否则程序报错
-  check_proxy:
-    - "http://proxy1.example.com:8080" #配置检测代理，如果不想配置可以直接连接，推荐使国内住宅IP
+  proxy: "http://127.0.0.1:7890" #配置telegram代理，支持http和socks5。示例语法 socks5://127.0.0.1:7890
