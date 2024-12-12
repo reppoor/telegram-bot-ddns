@@ -47,26 +47,13 @@ func GetDomainInfo() (map[string]map[string]map[string]interface{}, error) {
 		domainMap[domain.Domain][domain.ForwardingDomain]["Ban"] = domain.Ban
 	}
 
-	// 打印并返回合并后的数据
-	//for domainName, forwardingMap := range domainMap {
-	//	fmt.Printf("%s: {\n", domainName)
-	//	for forwardingDomain, details := range forwardingMap {
-	//		fmt.Printf("  %s: {\n", forwardingDomain)
-	//		for key, value := range details {
-	//			fmt.Printf("    %s: %v\n", key, value)
-	//		}
-	//		fmt.Println("  }")
-	//	}
-	//	fmt.Println("}")
-	//}
-
 	return domainMap, nil
 }
 
 func GetDomainIDInfo(ID string) (domainInfo models.Domain, err error) {
 	var domain models.Domain
 	// 初始化默认值
-	var numericID string = ID
+	var numericID = ID
 
 	// 检查并提取 ID 的数字部分（如果包含 "-"）
 	if strings.Contains(ID, "-") {
@@ -100,7 +87,7 @@ func GetDomainIDInfo(ID string) (domainInfo models.Domain, err error) {
 
 func UpdateDomainIp(ID string, newIP string) (models.Domain, error) {
 	// 初始化默认值
-	var numericID string = ID
+	var numericID = ID
 
 	// 检查并提取 ID 的数字部分（如果包含 "-"）
 	if strings.Contains(ID, "-") {
@@ -139,7 +126,7 @@ func UpdateDomainIp(ID string, newIP string) (models.Domain, error) {
 func DeleteDomainByID(ID string) (models.Domain, error) {
 	var domain models.Domain
 	// 初始化默认值
-	var numericID string = ID
+	var numericID = ID
 
 	// 检查并提取 ID 的数字部分（如果包含 "-"）
 	if strings.Contains(ID, "-") {
@@ -180,7 +167,7 @@ func DeleteDomainByID(ID string) (models.Domain, error) {
 
 func UpdateDomainBan(ID string, Ban bool) (models.Domain, error) {
 	// 初始化默认值
-	var numericID string = ID
+	var numericID = ID
 
 	// 检查并提取 ID 的数字部分（如果包含 "-"）
 	if strings.Contains(ID, "-") {
