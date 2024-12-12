@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 // Config 配置加载逻辑
@@ -32,16 +31,14 @@ type Config struct {
 	} `yaml:"telegram"`
 
 	Network struct {
-		EnableProxy      bool     `yaml:"enable_proxy"`       // 是否启用telegram代理
-		Proxy            string   `yaml:"proxy"`              // telegram网络代理地址
-		EnableCheckProxy bool     `yaml:"enable_check_proxy"` // 是否启用检测代理
-		CheckProxy       []string `yaml:"check_proxy"`        // 检测代理地址
+		EnableProxy bool   `yaml:"enable_proxy"` // 是否启用telegram代理
+		Proxy       string `yaml:"proxy"`        // telegram网络代理地址
 	} `yaml:"network"`
 
 	Check struct {
-		IpCheckTime time.Duration `yaml:"ip_check_time"` // 每秒检测时间
-		CheckTime   time.Duration `yaml:"check_time"`    // 每分钟检测时间
-	} `yaml:"network"`
+		IpCheckTime int `yaml:"ip_check_time"` // 每秒检测时间
+		CheckTime   int `yaml:"check_time"`    // 每分钟检测时间
+	} `yaml:"check"`
 }
 
 // LoadConfig 加载 YAML 配置文件

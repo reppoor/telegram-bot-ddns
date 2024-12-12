@@ -23,7 +23,7 @@ func CheckTCPConnectivity(ip string, port int) bool {
 		fmt.Printf("加载配置文件失败: %v", err)
 	}
 	for i := 0; i < 5; i++ {
-		conn, err := net.DialTimeout("tcp", address, Config.Check.IpCheckTime*time.Second)
+		conn, err := net.DialTimeout("tcp", address, time.Duration(Config.Check.IpCheckTime)*time.Second)
 		if err == nil {
 			success = true
 			_ = conn.Close() // 关闭连接

@@ -78,7 +78,8 @@ func TelegramApp() {
 	log.Printf("已授权账户: %s", bot.Self.UserName)
 	// 创建一个单独的 Goroutine 用于定时任务
 	go func() {
-		ticker := time.NewTicker(Config.Check.CheckTime * time.Minute)
+
+		ticker := time.NewTicker(time.Duration(Config.Check.CheckTime) * time.Minute)
 		defer ticker.Stop() // 确保程序退出时停止Ticker
 		for {
 			select {
@@ -104,7 +105,6 @@ func TelegramApp() {
 			go handlers.CallbackQuery(bot, update, Config)
 			continue
 		}
-
 		// 仅处理包含消息的更新
 		if update.Message != nil {
 			go handlers.HandleCommand(bot, update, Config)
