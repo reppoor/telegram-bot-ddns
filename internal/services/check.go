@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"telegrambot/config"
 	"telegrambot/internal/db"
 	"telegrambot/internal/db/repository"
 	"time"
@@ -16,9 +17,13 @@ import (
 func CheckTCPConnectivity(ip string, port int) bool {
 	address := fmt.Sprintf("%s:%d", ip, port)
 	success := false
-
+	// 加载配置文件
+	Config, err := config.LoadConfig("")
+	if err != nil {
+		fmt.Printf("加载配置文件失败: %v", err)
+	}
 	for i := 0; i < 5; i++ {
-		conn, err := net.DialTimeout("tcp", address, 3*time.Second)
+		conn, err := net.DialTimeout("tcp", address, Config.Check.IpCheckTime*time.Second)
 		if err == nil {
 			success = true
 			_ = conn.Close() // 关闭连接

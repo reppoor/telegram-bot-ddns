@@ -18,3 +18,7 @@ cloudflare:
 network:
   enable_proxy: true # 开启后一定要保证语法正确，否则程序报错
   proxy: "http://127.0.0.1:7890" #配置telegram代理，支持http和socks5。示例语法 socks5://127.0.0.1:7890
+
+check:
+  ip_check_time : 3 # 单位秒Second
+  check_time: 10 #单位分钟Minute (建议超过5分钟，否则报错)

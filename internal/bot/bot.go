@@ -78,7 +78,7 @@ func TelegramApp() {
 	log.Printf("已授权账户: %s", bot.Self.UserName)
 	// 创建一个单独的 Goroutine 用于定时任务
 	go func() {
-		ticker := time.NewTicker(10 * time.Minute)
+		ticker := time.NewTicker(Config.Check.CheckTime * time.Minute)
 		defer ticker.Stop() // 确保程序退出时停止Ticker
 		for {
 			select {
