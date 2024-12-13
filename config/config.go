@@ -99,6 +99,7 @@ func findProjectRoot(startDir string) (string, error) {
 			break
 		}
 		startDir = parentDir
+		fmt.Printf(startDir)
 	}
 
 	return "", fmt.Errorf("项目根目录未找到")
