@@ -18,4 +18,4 @@ COPY --from=builder /app/cmd/main /app/cmd/main
 # 设置容器启动命令
 CMD ["/app/cmd/main"]
 
-#docker run -v /etc/telegrambot/conf.yaml:/app/conf.yaml go-telegram-ddns
+#docker run -v /path/conf.yaml:/app/conf.yaml go-telegram-ddns
