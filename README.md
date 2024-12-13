@@ -1,12 +1,55 @@
-### 目录和文件说明：
+# telegram-bot-DDNS
+www.baidu.com
+### 一款Telegram动态域名解析机器人
 
-- **cmd/**: 包含程序的入口文件 `main.go`，启动和初始化整个应用。
-- **config/**: 配置相关文件，加载配置的逻辑 `config.go`。
-- **internal/**: 项目核心逻辑部分，包含机器人功能实现、消息处理、指令解析、服务调用等。
-    - **bot/**: 机器人核心逻辑和消息处理模块。
-    - **services/**: 相关服务，ddns
-    - **db/**: 数据库相关操作，包括数据模型、数据操作层（仓库）以及数据库连接管理。
-    - **utils/**: 项目中使用的工具函数，比如日志记录和 HTTP 请求工具。
-- **tests/**: 项目的测试代码，确保各个模块的功能正确性。
-- **go.mod 和 go.sum**: Go 项目的依赖管理文件。
-- **README.md**: 项目说明文档。
+# 开发环境
+
+GO >= 1.21.4
+
+MYSQL > =  5.7.34
+
+# 运行方式
+## docker运行
+### 1.安装aaPanel
+```
+URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];then curl -ksSO "$URL" ;else wget --no-check-certificate -O install_7.0_en.sh "$URL";fi;bash install_7.0_en.sh aapanel
+```
+### 2.进入aaPanel安装docker和mysql，并创建好数据库
+
+### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制一下内容进行对应完善并保存
+```
+database:
+  user: ""           # 数据库用户名
+  password: ""   # 数据库密码
+  host: ""          # 数据库主机
+  port: "3306"                   # 数据库端口
+  name: ""           # 数据库名称
+  charset: "utf8mb4"             # 字符集
+
+telegram:
+  id :  #telegram用户ID
+  token : "" # telegram机器人Token找@BotFather创建
+  apiEndpoint: "https://api.telegram.org"                  #telegramAPI 可以反代，如果不知道在做什么，请不要更改
+
+cloudflare:
+  email: ""               #cloudflare的email
+  key: ""  #cloudflare的key
+
+network:
+  enable_proxy: true # 开启:true,关闭:false。开启后一定要保证代理语法正确，否则程序报错
+  proxy: "http://127.0.0.1:7890" #配置telegram代理，支持http和socks5。示例语法 socks5://127.0.0.1:7890
+
+check:
+  ip_check_time : 3 # 单位秒Second
+  check_time: 10 #单位分钟Minute (建议超过5分钟，否则报错)
+
+```
+### 4.下拉docker镜像并运行容器
+```
+docker 命令
+```
+
+# 初始化机器人
+```
+/init 进行初始化数据库，否则无法使用
+```
