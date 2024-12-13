@@ -1,5 +1,5 @@
 # telegram-bot-DDNS
-www.baidu.com
+[telegram-bot-DDNS](https://github.com/reppoor/telegram-bot-ddns)
 ### 一款Telegram动态域名解析机器人
 
 # 开发环境
