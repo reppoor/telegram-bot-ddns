@@ -7,6 +7,5 @@ import (
 
 // 更新 A 记录的函数
 func TestRepository(t *testing.T) {
-	_ = services.ALLCheckTCPConnectivity()
-
+	_ = services.CheckTCPConnectivity("", 7890)
 }
