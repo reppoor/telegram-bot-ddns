@@ -102,12 +102,23 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			return
 		case "insert":
 			fmt.Printf("插入命令\n")
+			if ID != Config.Telegram.Id {
+				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
 			// 获取命令部分（例如 /insert）
 			command := update.Message.Command()
 			// 提取命令后面的部分（参数）
 			params := strings.TrimSpace(update.Message.Text[len(command)+1:]) // 去掉 "/insert " 部分
 			_, err := utils.ValidateFormat(params)
 			if err != nil {
+				messageText := fmt.Sprintf("*请参考改格式:*`www.baidu.com#www.hao123.com#7890#运营商`\n*非法格式详情:*`%s`", err) // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
 				fmt.Println(err)
 				return
 			}
@@ -117,9 +128,17 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			db.InitDB() //连接数据库
 			info, err := repository.InsertDomainInfo(DomainInfo[0], DomainInfo[1], port, DomainInfo[3])
 			if err != nil {
+				messageText := fmt.Sprintf("插入一条转发记录失败❌️️") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
 				fmt.Println(err)
 				return
 			}
+			messageText := fmt.Sprintf("插入一条转发记录成功✅️") // 格式化消息内容，使用 Markdown 格式
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+			msg.ParseMode = "Markdown"
+			_, _ = bot.Send(msg)
 			fmt.Println(info)
 			return
 		default:

@@ -13,7 +13,7 @@ func ValidateFormat(params string) (bool, error) {
 
 	// 检查拆分后的部分数量是否为 4
 	if len(parts) != 4 {
-		return false, fmt.Errorf("格式不正确请确保只有4个#号 %d", len(parts))
+		return false, fmt.Errorf("格式不正确请确保只有4个#号当前#号个数:%d", len(parts))
 	}
 
 	// 验证第一部分是否为有效域名格式（简单检查）
@@ -32,11 +32,11 @@ func ValidateFormat(params string) (bool, error) {
 	return true, nil
 }
 
-// isValidDomain 使用正则表达式来验证域名格式为 "www. + 域名 + . + 顶级域名"
+// isValidDomain 验证域名格式是否正确（只允许出现两个点）
 func isValidDomain(domain string) bool {
-	// 正则表达式检查 "www" + 域名 + "." + 顶级域名
-	// 举例: www.baidu.com
-	regex := `^www\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
+	// 正则表达式检查: 子域名.主域名.顶级域名
+	// 举例: www.baidu.com, sub.example.org
+	regex := `^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
 	match, err := regexp.MatchString(regex, domain)
 	if err != nil {
 		// 如果正则匹配出错，认为域名无效
