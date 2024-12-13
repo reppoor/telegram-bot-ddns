@@ -141,6 +141,11 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, _ = bot.Send(msg)
 			fmt.Println(info)
 			return
+		case "version":
+			messageText := fmt.Sprintf("`当前BOT版本1.0.0`") // 格式化消息内容，使用 Markdown 格式
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+			msg.ParseMode = "Markdown"
+			_, _ = bot.Send(msg)
 		default:
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "抱歉，我不识别这个命令。")
 			_, _ = bot.Send(msg)

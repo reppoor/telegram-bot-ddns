@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
 	"telegrambot/config"
 	"telegrambot/internal/bot/handlers"
 	"telegrambot/internal/services"
