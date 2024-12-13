@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"strconv"
 	"strings"
@@ -201,4 +202,30 @@ func UpdateDomainBan(ID string, Ban bool) (models.Domain, error) {
 
 	// 返回更新后的记录
 	return domain, nil
+}
+
+func InsertDomainInfo(Domain string, ForwardingDomain string, Port int, ISP string) (models.Domain, error) {
+	// 先查询数据库，检查是否存在相同的 ForwardingDomain 和 Port 组合
+	var existingDomain models.Domain
+	if err := db.DB.Where("forwarding_domain = ? AND port = ?", ForwardingDomain, Port).First(&existingDomain).Error; err == nil {
+		// 如果存在记录，则返回错误，表示该记录已经存在
+		return models.Domain{}, fmt.Errorf("已存在转发域名 '%s' and 端口 '%d", ForwardingDomain, Port)
+	} else if err != gorm.ErrRecordNotFound {
+		// 如果发生了其他错误（非记录未找到），则返回错误
+		return models.Domain{}, fmt.Errorf("非记录未找到info: %v", err)
+	}
+	DomainInfo := models.Domain{
+		Domain:           Domain,
+		ForwardingDomain: ForwardingDomain,
+		Port:             Port,
+		IP:               "0",
+		ISP:              ISP,
+		Ban:              false,
+	}
+	// 将新的记录插入数据库
+	if err := db.DB.Create(&DomainInfo).Error; err != nil {
+		return models.Domain{}, fmt.Errorf("插入数据库失败info: %v", err)
+	}
+
+	return DomainInfo, nil
 }
