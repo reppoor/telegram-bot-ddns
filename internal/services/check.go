@@ -109,15 +109,15 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 			}
 			break
 		}
-
+		// 主域名连通性检测
+		var messageID int
 		DomainIP, err := ResolveDomainToIP(domainName)
 		if err != nil {
 			fmt.Printf("主域名未进行配置解析: %s\n", err)
+			sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*主域名未进行配置解析记录，请先进行解析:*`%s`", domainName), &messageID, false, false)
 			continue
 		}
 
-		// 主域名连通性检测
-		var messageID int
 		sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*开始检测域名:*`%s:%d`", domainName, port), &messageID, false, false)
 		fmt.Printf("开始检测域名:%s:%d\n", domainName, port)
 		if isConnected := CheckTCPConnectivity(DomainIP, port); isConnected {
@@ -139,7 +139,7 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 			forwardingIP, err := ResolveDomainToIP(forwardingDomain)
 			if err != nil {
 				fmt.Printf("转发域名解析错误: %s, 错误: %s\n", forwardingDomain, err)
-				sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*转发域名解析错误:*`%s`, *错误:*`%s`", forwardingDomain, err), &messageID, true, true)
+				sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*转发域名解析错误:*`%s`, *错误:*`%s`", forwardingDomain, err), &messageID, false, true)
 				continue
 			}
 			fmt.Printf("开始检测转发域名:%s:%d\n", forwardingDomain, port)

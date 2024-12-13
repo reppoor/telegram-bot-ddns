@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	_ "modernc.org/sqlite"
 	"telegrambot/config"
 	"telegrambot/internal/db/models"
 	"time"
