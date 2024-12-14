@@ -56,6 +56,7 @@ check:
 ```
 docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /path/to/your/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
 ```
+#### 启动后去容器查看日记，可以看到启动失败还是成功
 
 # 初始化机器人
 找@BotFather，进入自己的机器人
