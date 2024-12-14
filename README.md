@@ -1,7 +1,7 @@
 # telegram-bot-DDNS
 [telegram-bot-DDNS](https://github.com/reppoor/telegram-bot-ddns)
 ### 一款Telegram动态域名解析机器人
-
+![描述文本](photo.jpg)
 # 开发环境
 GO >= 1.21.4
 
