@@ -67,9 +67,9 @@ docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /path/to/your/c
 start - 开始
 id - 获取ID
 init - bot初始化
-info - 列出转发信息
-insert - 插入一条转发记录
-check - 检测所有节点连通性
+info - 转发信息
+insert - 插入转发记录
+check - 检测连通性
 ```
 在docker启动后首先点击该命令，否则无法使用
 ```
