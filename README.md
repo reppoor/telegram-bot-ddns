@@ -2,7 +2,7 @@
 [telegram-bot-DDNS](https://github.com/reppoor/telegram-bot-ddns)
 
 [telegram频道](https://t.me/ddns_reppoor)
-### 一款Telegram动态域名解析机器人
+# 一款Telegram动态域名解析机器人
 仅支持IPV4，IPV6请绕道
 
 仅接受cloudflare托管的域名
@@ -13,6 +13,13 @@ GO >= 1.21.4
 
 MYSQL > =  5.7.34
 
+# 功能特性
+1.一键解析A记录到绑定域名
+
+2.定时监控域名连通性进行自动切换
+
+3.检测方法为TCP三次握手
+
 # 准备工作
 
 #### 如果检测对象为中国的服务器且屏蔽海外IP的机器，建议准备一台IP地区为中国的VPS
@@ -22,13 +29,13 @@ VPS操作系统建议Debian/Ubuntu
 
 # 运行方式
 ## docker运行
-### 1.安装aaPanel
+#### 1.安装aaPanel
 ```
 URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];then curl -ksSO "$URL" ;else wget --no-check-certificate -O install_7.0_en.sh "$URL";fi;bash install_7.0_en.sh aapanel
 ```
-### 2.进入aaPanel安装docker和mysql，并创建好数据库
+#### 2.进入aaPanel安装docker和mysql，并创建好数据库
 
-### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制以下内容进行对应完善并保存
+#### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制以下内容进行对应完善并保存
 ```
 database:
   user: "" # 数据库用户名
@@ -56,15 +63,16 @@ check:
   check_time: 10 # 主域名检测单位分钟Minute (建议超过5分钟，否则报错)
 
 ```
-### 4.下拉docker镜像并运行容器
+#### 4.下拉docker镜像并运行容器
 将/path/conf.yaml替换为宿主机的原文件路径
 ```
 docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /path/to/your/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
 ```
-#### 启动后去容器查看日记，可以看到启动失败还是成功
+#### 5.启动后去容器查看日记，可以看到启动失败还是成功
 
 # 初始化机器人
-找@BotFather，进入自己的机器人
+
+#### 找@BotFather，进入自己的机器人
 
 1.点击Edit Bot
 
@@ -83,5 +91,5 @@ check - 检测连通性
 ```
 /init 进行初始化数据库，否则无法使用
 ```
-## Stargazers over time
+### Stargazers over time
 [![Stargazers over time](https://starchart.cc/reppoor/telegram-bot-ddns.svg?variant=adaptive)](https://starchart.cc/reppoor/telegram-bot-ddns)
