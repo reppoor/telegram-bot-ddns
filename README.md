@@ -21,7 +21,7 @@ URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];
 ```
 ### 2.进入aaPanel安装docker和mysql，并创建好数据库
 
-### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制一下内容进行对应完善并保存
+### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制以下内容进行对应完善并保存
 ```
 database:
   user: "" # 数据库用户名
