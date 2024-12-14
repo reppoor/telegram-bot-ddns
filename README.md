@@ -1,6 +1,10 @@
 # telegram-bot-DDNS
 [telegram-bot-DDNS](https://github.com/reppoor/telegram-bot-ddns)
 ### 一款Telegram动态域名解析机器人
+仅支持IPV4，IPV6请绕道
+
+仅接受cloudflare托管的域名
+
 ![描述文本](photo.jpg)
 # 开发环境
 GO >= 1.21.4
