@@ -24,21 +24,21 @@ URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];
 ### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制一下内容进行对应完善并保存
 ```
 database:
-  user: ""           # 数据库用户名
-  password: ""   # 数据库密码
-  host: ""          # 数据库主机
-  port: "3306"                   # 数据库端口
-  name: ""           # 数据库名称
-  charset: "utf8mb4"             # 字符集
+  user: "" # 数据库用户名
+  password: "" # 数据库密码
+  host: "" # 数据库主机
+  port: "3306" # 数据库端口
+  name: "" # 数据库名称
+  charset: "utf8mb4" # 字符集
 
 telegram:
   id :  #telegram用户ID
   token : "" # telegram机器人Token找@BotFather创建
-  apiEndpoint: "https://api.telegram.org"                  #telegramAPI 可以反代，如果不知道在做什么，请不要更改
+  apiEndpoint: "https://api.telegram.org" #telegramAPI 可以反代，如果不知道在做什么，请不要更改
 
 cloudflare:
-  email: ""               #cloudflare的email
-  key: ""  #cloudflare的key
+  email: "" #cloudflare的email
+  key: "" #cloudflare的key
 
 network:
   enable_proxy: true # 开启:true,关闭:false。开启后一定要保证代理语法正确，否则程序报错
