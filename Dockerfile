@@ -12,8 +12,8 @@ RUN curl -L https://gh.api.99988866.xyz/https://github.com/reppoor/telegram-bot-
     && unzip telegram-bot-ddns-1.0.0.zip \
     && rm telegram-bot-ddns-1.0.0.zip
 
-# 重命名解压后的文件夹
-RUN mv /app/telegram-bot-ddns-1.0.0 /app/telegrambot
+# 重命名解压后的文件夹（相对路径）
+RUN mv telegram-bot-ddns-1.0.0 telegrambot
 
 # 设置安装依赖的变量环境
 RUN go env -w GO111MODULE=on
@@ -24,12 +24,19 @@ WORKDIR /app/telegrambot
 RUN go mod tidy
 RUN ls /app/telegrambot
 # 构建 Go 应用
-RUN go build -o /app/telegrambot/cmd/main cmd/main.go
-
+RUN go build -o cmd/main cmd/main.go
+# 使用轻量级的基础镜像来运行应用
 FROM alpine:latest
-COPY --from=builder /app/telegrambot/cmd /app/telegrambot/cmd
-COPY --from=builder /app/telegrambot/conf.yaml /app/telegrambot/conf.yaml
-COPY --from=builder /app/telegrambot/go.mod /app/telegrambot/go.mod
+# 创建工作目录
+WORKDIR /app
+
+# 从构建阶段复制构建产物
+COPY --from=builder /app/telegrambot/cmd/main /app/
+# 从构建阶段复制构建产物
+COPY --from=builder /app/telegrambot/go.mod /app/
+# 复制配置文件
+COPY --from=builder /app/telegrambot/conf.yaml /app/
+
 
 # 设置容器启动命令
-CMD ["/app/telegrambot/cmd/main"]
+CMD ["./main"]
