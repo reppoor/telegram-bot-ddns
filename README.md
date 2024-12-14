@@ -44,11 +44,28 @@ check:
 
 ```
 ### 4.下拉docker镜像并运行容器
+将/path/conf.yaml替换为宿主机的原文件路径
 ```
-docker 命令
+docker run -d -v /path/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
 ```
 
 # 初始化机器人
+找@BotFather，进入自己的机器人
+
+1.点击Edit Bot
+
+2.点击Edit Commands
+
+3.输入如下命令发送
+```
+start - 开始
+id - 获取ID
+init - bot初始化
+info - 列出转发信息
+insert - 插入一条转发记录
+check - 检测所有节点连通性
+```
+在docker启动后首先点击该命令，否则无法使用
 ```
 /init 进行初始化数据库，否则无法使用
 ```
