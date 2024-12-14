@@ -7,6 +7,8 @@
 
 需要准备一台IP地区为中国的VPS
 
+VPS操作系统 Debian/Ubuntu
+
 仅接受cloudflare托管的域名
 
 ![描述文本](photo.jpg)
