@@ -15,9 +15,9 @@ MYSQL > =  5.7.34
 
 # 准备工作
 
-需要准备一台IP地区为中国的VPS
+#### 如果检测对象为中国的服务器且屏蔽海外IP的机器，建议准备一台IP地区为中国的VPS
 
-VPS操作系统 Debian/Ubuntu
+VPS操作系统建议Debian/Ubuntu
 
 
 # 运行方式
