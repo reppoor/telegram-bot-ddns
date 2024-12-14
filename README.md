@@ -50,7 +50,7 @@ check:
 ### 4.下拉docker镜像并运行容器
 将/path/conf.yaml替换为宿主机的原文件路径
 ```
-docker run -d -v /path/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
+docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /path/to/your/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
 ```
 
 # 初始化机器人
