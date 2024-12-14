@@ -2,13 +2,7 @@
 FROM golang:1.21.4-alpine AS builder
 
 # 安装必要的工具来下载和解压文件
-RUN if [ -f /etc/alpine-release ]; then \
-        apk add --no-cache curl unzip; \
-    elif [ -f /etc/debian_version ]; then \
-        apt-get update && apt-get install -y curl unzip && apt-get clean; \
-    elif [ -f /etc/redhat-release ]; then \
-        yum install -y curl unzip; \
-    fi
+RUN apk add --no-cache curl unzip
 
 # 设置工作目录
 WORKDIR /app
