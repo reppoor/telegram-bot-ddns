@@ -1,5 +1,7 @@
 # telegram-bot-DDNS
 [telegram-bot-DDNS](https://github.com/reppoor/telegram-bot-ddns)
+
+[telegram频道](https://t.me/ddns_reppoor)
 ### 一款Telegram动态域名解析机器人
 仅支持IPV4，IPV6请绕道
 
