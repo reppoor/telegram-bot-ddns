@@ -5,10 +5,6 @@
 ### 一款Telegram动态域名解析机器人
 仅支持IPV4，IPV6请绕道
 
-需要准备一台IP地区为中国的VPS
-
-VPS操作系统 Debian/Ubuntu
-
 仅接受cloudflare托管的域名
 
 ![描述文本](photo.jpg)
@@ -16,6 +12,13 @@ VPS操作系统 Debian/Ubuntu
 GO >= 1.21.4
 
 MYSQL > =  5.7.34
+
+# 准备工作
+
+需要准备一台IP地区为中国的VPS
+
+VPS操作系统 Debian/Ubuntu
+
 
 # 运行方式
 ## docker运行
