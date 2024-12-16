@@ -3,9 +3,10 @@ FROM golang:1.21.4-alpine AS builder
 
 # 安装必要的工具来下载和解压文件
 RUN apk add --no-cache curl unzip
-
 # 安装 SQLite 依赖库（为了支持 go-sqlite3 驱动）
 RUN apk add --no-cache sqlite sqlite-dev
+# 安装构建工具和 C 编译器
+RUN apk add --no-cache gcc musl-dev
 
 # 设置工作目录
 WORKDIR /app
@@ -25,7 +26,8 @@ RUN go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
 # 切换到解压后的文件夹，并安装 Go 依赖
 WORKDIR /app/telegrambot
 RUN go mod tidy
-RUN ls /app/telegrambot
+# 设置 CGO_ENABLED 环境变量为 1 启用 CGO
+ENV CGO_ENABLED=1
 # 构建 Go 应用
 RUN go build -o cmd/main cmd/main.go
 # 使用轻量级的基础镜像来运行应用
