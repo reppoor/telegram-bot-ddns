@@ -48,20 +48,19 @@ database:
 telegram:
   id :  #telegram用户ID
   token : "" # telegram机器人Token找@BotFather创建
-  apiEndpoint: "https://api.telegram.org" #telegramAPI 末尾不要/，可以反代，如果不知道在做什么，请不要更改
+  apiEndpoint: "https://api.telegram.org" #telegramAPI 可以反代，如果不知道在做什么，请不要更改
 
 cloudflare:
   email: "" #cloudflare的email
-  key: "" #cloudflare的全局key
+  key: "" #cloudflare的key
 
 network:
   enable_proxy: true # 开启:true,关闭:false。开启后一定要保证代理语法正确，否则程序报错
-  proxy: "http://127.0.0.1:7890" #配置telegram代理， 末尾不要/，支持http和socks5。示例语法 socks5://127.0.0.1:7890
+  proxy: "http://user:pass@127.0.0.1:7890" #配置telegram代理，支持http和socks5。示例语法 socks5://127.0.0.1:7890 账号和用户名示例语法socks5://user:pass@127.0.0.1:7890
 
 check:
-  ip_check_time : 3 # 节点检查单位秒Second
-  check_time: 10 # 主域名检测单位分钟Minute (建议超过5分钟，否则报错)
-
+  ip_check_time : 3 # 单位秒Second
+  check_time: 10 #单位分钟Minute (建议超过5分钟，否则报错)
 ```
 #### 4.下拉docker镜像并运行容器
 将/path/conf.yaml替换为宿主机的原文件路径
