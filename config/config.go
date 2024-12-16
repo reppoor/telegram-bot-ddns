@@ -11,6 +11,8 @@ import (
 // Config 配置加载逻辑
 type Config struct {
 	Database struct {
+		Type     string `yaml:"type"`     // 数据库用户名
+		File     string `yaml:"file"`     // 数据库用户名
 		User     string `yaml:"user"`     // 数据库用户名
 		Password string `yaml:"password"` // 数据库密码
 		Host     string `yaml:"host"`     // 数据库主机
@@ -61,7 +63,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 	//filePath = filepath.Join(filepath.Dir(rootDir), "conf.yaml") // 默认文件名
 	//fmt.Println(rootDir + "/conf.yaml") //打印conf.yaml路径情况，进行调试
-	file, err := os.Open(rootDir + "/conf.yaml")
+	file, err := os.Open(rootDir + "/testconf.yaml")
 	if err != nil {
 		log.Printf("无法打开配置文件 %s: %v", filePath, err)
 		return nil, err

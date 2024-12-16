@@ -38,6 +38,8 @@ URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];
 #### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制以下内容进行对应完善并保存
 ```
 database:
+  type: "sqlite" # 数据库类型，可选mysql和sqlite,如果选mysql就需要填用户名和密码等配置
+  file: "./database.db" #sqlite的文件路径
   user: "" # 数据库用户名
   password: "" # 数据库密码
   host: "" # 数据库主机

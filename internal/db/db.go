@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
@@ -16,62 +17,107 @@ var DB *gorm.DB
 // InitDB 初始化数据库连接
 func InitDB() {
 	// 加载配置文件
-	Config, err := config.LoadConfig("")
+	Config, err := config.LoadConfig("") // 加载配置路径
 	if err != nil {
 		log.Fatalf("加载配置文件失败: %v", err)
 	}
 
-	// 构造 DSN
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s",
-		Config.Database.User,
-		Config.Database.Password,
-		Config.Database.Host,
-		Config.Database.Port,
-		Config.Database.Name,
-		Config.Database.Charset,
-	)
+	var dsn string
+
+	// 根据配置文件选择 MySQL 或 SQLite
+	if Config.Database.Type == "mysql" {
+		// 构造 MySQL DSN
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s",
+			Config.Database.User,
+			Config.Database.Password,
+			Config.Database.Host,
+			Config.Database.Port,
+			Config.Database.Name,
+			Config.Database.Charset,
+		)
+	} else if Config.Database.Type == "sqlite" {
+		// 构造 SQLite DSN
+		dsn = Config.Database.File // SQLite 使用文件路径
+	} else {
+		log.Fatalf("不支持的数据库类型: %v", Config.Database.Type)
+	}
 
 	// 初始化数据库连接
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	var db *gorm.DB
+	if Config.Database.Type == "mysql" {
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	} else if Config.Database.Type == "sqlite" {
+		db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	}
+
 	if err != nil {
 		log.Fatalf("无法连接到数据库: %v", err)
 	}
 
+	DB = db
 	log.Println("数据库连接成功")
-	SetupConnectionPool()
-	//AutoMigrate()
+
+	// 设置连接池等（适用于 MySQL，SQLite 没有这么复杂）
+	if Config.Database.Type == "mysql" {
+		SetupConnectionPool()
+	}
 }
 
 // ATInitDB InitDB 初始化数据库连接
 func ATInitDB() {
 	// 加载配置文件
-	Config, err := config.LoadConfig("")
+	Config, err := config.LoadConfig("") // 加载配置路径
 	if err != nil {
 		log.Fatalf("加载配置文件失败: %v", err)
 	}
 
-	// 构造 DSN
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s",
-		Config.Database.User,
-		Config.Database.Password,
-		Config.Database.Host,
-		Config.Database.Port,
-		Config.Database.Name,
-		Config.Database.Charset,
-	)
+	var dsn string
+
+	// 根据配置文件选择 MySQL 或 SQLite
+	if Config.Database.Type == "mysql" {
+		// 构造 MySQL DSN
+		dsn = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s",
+			Config.Database.User,
+			Config.Database.Password,
+			Config.Database.Host,
+			Config.Database.Port,
+			Config.Database.Name,
+			Config.Database.Charset,
+		)
+	} else if Config.Database.Type == "sqlite" {
+		// 构造 SQLite DSN
+		dsn = Config.Database.File // SQLite 使用文件路径
+	} else {
+		log.Fatalf("不支持的数据库类型: %v", Config.Database.Type)
+	}
 
 	// 初始化数据库连接
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	var db *gorm.DB
+	if Config.Database.Type == "mysql" {
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	} else if Config.Database.Type == "sqlite" {
+		db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	}
+
 	if err != nil {
 		log.Fatalf("无法连接到数据库: %v", err)
 	}
 
+	DB = db
 	log.Println("数据库连接成功")
-	SetupConnectionPool()
+
+	// 设置连接池等（适用于 MySQL，SQLite 没有这么复杂）
+	if Config.Database.Type == "mysql" {
+		SetupConnectionPool()
+	}
 	AutoMigrate()
 }
 
