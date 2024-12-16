@@ -91,6 +91,7 @@ docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /root/conf.yaml
 3.输入如下命令发送
 ```
 start - 开始
+version - 当前版本
 id - 获取ID
 init - bot初始化
 info - 转发信息
