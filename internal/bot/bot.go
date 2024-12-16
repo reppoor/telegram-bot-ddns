@@ -45,9 +45,8 @@ func TelegramApp() {
 				Proxy: func(req *http.Request) (*url.URL, error) {
 					// 获取用户名和密码
 					username := proxyAuth.Username()
-					password, _ := proxyAuth.Password() // 这里需要处理返回的元组
+					password, _ := proxyAuth.Password()
 
-					// 只取 password 部分
 					proxyURLWithAuth := &url.URL{
 						Scheme: "http",
 						Host:   proxyURL.Host,
