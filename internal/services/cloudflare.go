@@ -9,8 +9,8 @@ import (
 	"telegrambot/config"
 )
 
-// UpdateARecord 更新 A 记录的函数
-func UpdateARecord(fullDomain, ip string) (string string, err error) {
+// UpdateARecord 更新 A 记录的函数，目前支持根域名与二级域名
+func UpdateARecord(fullDomain, ip string) (string, error) {
 	// 创建 Cloudflare 客户端
 	Config, err := config.LoadConfig("")
 	if err != nil {
@@ -23,77 +23,83 @@ func UpdateARecord(fullDomain, ip string) (string string, err error) {
 		return "", fmt.Errorf("创建 Cloudflare 客户端失败: %v", err)
 	}
 	ctx := context.Background()
-	fmt.Println("创建 Cloudflare 客户端成功")
+
 	// 分割域名为子域名和主域名
 	parts := strings.Split(fullDomain, ".")
 	if len(parts) < 2 {
 		return "", fmt.Errorf("无效的域名: %s", fullDomain)
 	}
 
-	domain := parts[len(parts)-2] + "." + parts[len(parts)-1] // 获取主域名
-	//subdomain := fullDomain[:len(fullDomain)-len(domain)-1]   // 获取子域名
-	rc := &cloudflare.ResourceContainer{
-		Level:      "",
-		Identifier: "",
-		Type:       "",
+	// 判断是否为根域名（example.com）
+	var subdomain string
+	if len(parts) == 2 {
+		subdomain = "" // 根域名没有子域名
+	} else {
+		subdomain = strings.Join(parts[:len(parts)-2], ".")
 	}
-	paramsListDNSRecordsParams := cloudflare.ListDNSRecordsParams{
-		Type:       "",
-		Name:       "",
-		Content:    "",
-		Proxied:    nil,
-		Comment:    "",
-		Tags:       nil,
-		TagMatch:   "",
-		Order:      "",
-		Direction:  "",
-		Match:      "",
-		Priority:   nil,
-		ResultInfo: cloudflare.ResultInfo{},
-	}
-	params := cloudflare.UpdateDNSRecordParams{
-		Type:     "",
-		Name:     "",
-		Content:  ip,
-		Data:     nil,
-		ID:       "",
-		Priority: nil,
-		TTL:      60,
-		Proxied:  nil,
-		Comment:  nil,
-		Tags:     nil,
-	}
+	domain := parts[len(parts)-2] + "." + parts[len(parts)-1]
+
 	// 获取域名的 Zone ID
 	zones, err := client.ListZones(ctx)
 	if err != nil {
 		return "", fmt.Errorf("获取 Zone 列表失败: %v", err)
 	}
-	// 在区域列表中查找匹配的主域名并返回其 Zone ID
+
+	var zoneID string
 	for _, zone := range zones {
-		//fmt.Println(zone.Name)
 		if zone.Name == domain {
-			rc.Identifier = zone.ID
-			DNSRecord, _, err := client.ListDNSRecords(ctx, rc, paramsListDNSRecordsParams)
-			if err != nil {
-				return "", err
-			}
-			for _, zone2 := range DNSRecord {
-				if zone2.Name == fullDomain {
-					params.Type = "A"
-					params.Name = zone2.Name
-					params.ID = zone2.ID
-					break
-				}
-			}
+			zoneID = zone.ID
+			break
 		}
+	}
+
+	if zoneID == "" {
+		return "", fmt.Errorf("未找到主域名 %s 对应的 Zone ID", domain)
+	}
+
+	// 列出 DNS 记录
+	rc := &cloudflare.ResourceContainer{
+		Level:      "zone",
+		Identifier: zoneID,
+	}
+	DNSRecords, _, err := client.ListDNSRecords(ctx, rc, cloudflare.ListDNSRecordsParams{})
+	if err != nil {
+		return "", fmt.Errorf("列出 DNS 记录失败: %v", err)
+	}
+
+	// 输出所有 DNS 记录，帮助调试
+	for _, record := range DNSRecords {
+		fmt.Printf("记录：ID=%s, 名称=%s, 类型=%s, 内容=%s\n", record.ID, record.Name, record.Type, record.Content)
+	}
+
+	var recordID string
+	for _, record := range DNSRecords {
+		// 如果是根域名或者完整匹配子域名
+		if (subdomain == "" && record.Name == domain) || record.Name == fullDomain {
+			recordID = record.ID
+			fmt.Printf("匹配的记录ID: %s\n", recordID) // 输出匹配的记录ID
+			break
+		}
+	}
+
+	// 如果没有找到记录
+	if recordID == "" {
+		return "", fmt.Errorf("未找到匹配的 DNS 记录：%s", fullDomain)
+	}
+
+	// 更新 DNS 记录
+	params := cloudflare.UpdateDNSRecordParams{
+		Type:    "A",
+		Name:    fullDomain,
+		Content: ip,
+		TTL:     60,
+		ID:      recordID, // 确保 ID 被正确设置
 	}
 	_, err = client.UpdateDNSRecord(ctx, rc, params)
 	if err != nil {
-		fmt.Println("更新失败", err)
-		return "", err
+		return "", fmt.Errorf("更新 DNS 记录失败: %v", err)
 	}
-	// 如果找不到匹配的 Zone ID，返回错误
-	//return fmt.Errorf("未找到子域名 %s 对应的 Zone ID", fullDomain)
-	fmt.Printf("域名解析成功")
+
+	// 返回成功信息
 	return "域名解析成功", nil
 }
