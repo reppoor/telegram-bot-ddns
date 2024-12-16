@@ -25,6 +25,11 @@ RUN go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
 # 切换到解压后的文件夹，并安装 Go 依赖
 WORKDIR /app/telegrambot
 RUN go mod tidy
+
+# 设置 CGO_ENABLED 环境变量为 1 启用 CGO
+ENV CGO_ENABLED=1
+
+
 RUN ls /app/telegrambot
 # 构建 Go 应用
 RUN go build -o cmd/main cmd/main.go
