@@ -71,11 +71,11 @@ sudo chmod 777 /root/database.db
 ```
 #### 5.下拉docker镜像并运行容器(使用mysql数据库的命令)
 ```
-docker run -d -v /root/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
+docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /root/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
 ```
 #### 6.下拉docker镜像并运行容器(使用sqlite数据库的命令)
 ```
-docker run -d -v /root/conf.yaml:/app/conf.yaml -v /root/database.db:/app/database.db reppoor/telegram-bot-ddns:latest
+docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /root/conf.yaml:/app/conf.yaml -v /root/database.db:/app/database.db reppoor/telegram-bot-ddns:latest
 ```
 
 #### 5.启动后去容器查看日记，可以看到启动失败还是成功
