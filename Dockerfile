@@ -11,12 +11,12 @@ RUN apk add --no-cache sqlite sqlite-dev
 WORKDIR /app
 
 # 从 GitHub 下载仓库并解压
-RUN curl -L https://gh.api.99988866.xyz/https://github.com/reppoor/telegram-bot-ddns/archive/refs/heads/dev.zip -o telegram-bot-ddns-master.zip \
+RUN curl -L https://gh.api.99988866.xyz/https://github.com/reppoor/telegram-bot-ddns/archive/refs/heads/master.zip -o telegram-bot-ddns-master.zip \
     && unzip telegram-bot-ddns-master.zip \
     && rm telegram-bot-ddns-master.zip
 
 # 重命名解压后的文件夹（相对路径）
-RUN mv telegram-bot-ddns-dev telegrambot
+RUN mv telegram-bot-ddns-master telegrambot
 
 # 设置安装依赖的变量环境
 RUN go env -w GO111MODULE=on
