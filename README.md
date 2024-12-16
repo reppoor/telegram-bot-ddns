@@ -28,18 +28,17 @@ VPS操作系统建议Debian/Ubuntu
 
 
 # 运行方式
-## docker运行
 #### 1.安装aaPanel
 ```
 URL=https://www.aapanel.com/script/install_7.0_en.sh && if [ -f /usr/bin/curl ];then curl -ksSO "$URL" ;else wget --no-check-certificate -O install_7.0_en.sh "$URL";fi;bash install_7.0_en.sh aapanel
 ```
-#### 2.进入aaPanel安装docker和mysql，并创建好数据库
+#### 2.进入aaPanel安装docker(如果需要使用mysql数据库，您可能需要下载mysql，创建好数据库并记住好数据库的账号密码)
 
-#### 3.需要进行在宿主机创建conf.yaml文件，路径可以自定义，复制以下内容进行对应完善并保存
+#### 3.需要在宿主机root创建conf.yaml文件
 ```
 database:
   type: "sqlite" # 数据库类型，可选mysql和sqlite,如果选mysql就需要填用户名和密码等配置
-  file: "./database.db" #sqlite的文件路径
+  file: "./database.db" #sqlite的文件路径，请不要更改路径
   user: "" # 数据库用户名
   password: "" # 数据库密码
   host: "" # 数据库主机
@@ -64,11 +63,26 @@ check:
   ip_check_time : 3 # 单位秒Second
   check_time: 10 #单位分钟Minute (建议超过5分钟，否则报错)
 ```
-#### 4.下拉docker镜像并运行容器
-将/path/conf.yaml替换为宿主机的原文件路径
+#### 4.在宿主主机的root目录下创建database.db文件，名字用这个即可，创建完毕后，同时赋予该文件所有权限
+
+(如果需要用sqlite数据库，否则忽略这条即可)
 ```
-docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /path/to/your/conf.yaml:/app/conf.yaml reppoor/telegram-bot-ddns:latest
+sudo chmod 777 /root/database.db
 ```
+#### 5.下拉docker镜像并运行容器(使用mysql数据库的命令)
+```
+docker pull reppoor/telegram-bot-ddns:latest && docker run -d \
+  -v /root/conf.yaml:/app/conf.yaml \
+  reppoor/telegram-bot-ddns:latest
+```
+#### 6.下拉docker镜像并运行容器(使用sqlite数据库的命令)
+```
+docker pull reppoor/telegram-bot-ddns:latest && docker run -d \
+  -v /root/conf.yaml:/app/conf.yaml \
+  -v /root/database.db:/app/database.db \
+  reppoor/telegram-bot-ddns:latest
+```
+
 #### 5.启动后去容器查看日记，可以看到启动失败还是成功
 
 # 初始化机器人
