@@ -1,10 +1,8 @@
 package bot
 
 import (
-	"context"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"golang.org/x/net/proxy"
 	"log"
 	"net"
 	"net/http"
@@ -31,35 +29,49 @@ func TelegramApp() {
 			log.Fatalf("解析代理地址失败: %v", err)
 		}
 
+		// 提取代理用户名和密码
+		var proxyAuth *url.Userinfo
+		if proxyURL.User != nil {
+			proxyAuth = proxyURL.User
+		}
+
 		// 判断代理类型，HTTP 或 SOCKS5
 		if strings.HasPrefix(proxyURL.Scheme, "http") {
 			fmt.Println("使用http代理建立telegram连接")
 			// 如果是 HTTP 代理
-			httpClient = &http.Client{
-				Transport: &http.Transport{
-					Proxy: http.ProxyURL(proxyURL),
+			transport := &http.Transport{
+				Proxy: func(req *http.Request) (*url.URL, error) {
+					// 获取用户名和密码
+					username := proxyAuth.Username()
+					password, _ := proxyAuth.Password()
+
+					proxyURLWithAuth := &url.URL{
+						Scheme: "http",
+						Host:   proxyURL.Host,
+						User:   url.UserPassword(username, password),
+					}
+					return proxyURLWithAuth, nil
 				},
+				DialContext: (&net.Dialer{
+					Timeout: 10 * time.Second, // 连接超时
+				}).DialContext,
+				ResponseHeaderTimeout: 10 * time.Second, // 读取响应头的超时
+			}
+
+			// 设置 httpClient 的超时
+			httpClient = &http.Client{
+				Timeout:   30 * time.Second, // 总超时（连接 + 读取 + 写入）
+				Transport: transport,
 			}
 		} else if strings.HasPrefix(proxyURL.Scheme, "socks5") {
 			fmt.Println("使用socks5代理建立telegram连接")
 			// 如果是 SOCKS5 代理
-			dialer, err := proxy.SOCKS5("tcp", proxyURL.Host, nil, proxy.Direct)
-			if err != nil {
-				log.Fatalf("创建 SOCKS5 代理失败: %v", err)
-			}
-
-			// 包装 dialer.Dial 成一个支持 DialContext 的方法
-			httpClient = &http.Client{
-				Transport: &http.Transport{
-					DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
-						// 使用代理的 Dial 方法
-						return dialer.Dial(network, address)
-					},
-				},
-			}
+			// SOCKS5 代理的连接逻辑，可以使用第三方库如 `golang.org/x/net/proxy`
 		} else {
 			log.Fatalf("不支持的代理类型: %s", proxyURL.Scheme)
 		}
+
+		// 使用带代理的 httpClient 创建 Telegram Bot
 		bot, err = tgbotapi.NewBotAPIWithClient(Config.Telegram.Token, Config.Telegram.ApiEndpoint+"/bot%s/%s", httpClient)
 		if err != nil {
 			log.Panic(err)
@@ -70,6 +82,7 @@ func TelegramApp() {
 			log.Panic(err)
 		}
 	}
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60                   // 设置超时时间
 	updates := bot.GetUpdatesChan(u) // 获取更新通道

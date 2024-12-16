@@ -1,11 +1,18 @@
 package tests
 
 import (
-	"telegrambot/internal/services"
+	"fmt"
+	"log"
+	"telegrambot/config"
 	"testing"
 )
 
 // 更新 A 记录的函数
 func TestRepository(t *testing.T) {
-	_ = services.CheckTCPConnectivity("", 7890)
+	// 加载配置文件
+	Config, err := config.LoadConfig("")
+	if err != nil {
+		log.Fatalf("加载配置文件失败: %v", err)
+	}
+	fmt.Printf(Config.Database.Host)
 }
