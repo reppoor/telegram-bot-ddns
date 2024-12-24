@@ -64,7 +64,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 	//filePath = filepath.Join(filepath.Dir(rootDir), "conf.yaml") // 默认文件名
 	//fmt.Println(rootDir + "/conf.yaml") //打印conf.yaml路径情况，进行调试
-	file, err := os.Open(rootDir + "/testconf.yaml")
+	file, err := os.Open(rootDir + "/conf.yaml")
 	if err != nil {
 		log.Printf("无法打开配置文件 %s: %v", filePath, err)
 		return nil, err
