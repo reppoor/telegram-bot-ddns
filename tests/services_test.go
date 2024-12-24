@@ -14,5 +14,5 @@ func TestRepository(t *testing.T) {
 	if err != nil {
 		log.Fatalf("加载配置文件失败: %v", err)
 	}
-	fmt.Printf(Config.Database.Host, "1111")
+	fmt.Printf(Config.Database.Host, "11")
 }
