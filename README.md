@@ -102,5 +102,11 @@ check - 检测连通性
 ```
 /init 进行初始化数据库，否则无法使用
 ```
-### Stargazers over time
+# 转发运营商收录清单
+
+### [池雨转发:t.me/chiyuzf](https://t.me/ddns_reppoor)
+
+
+
+# Stargazers over time
 [![Stargazers over time](https://starchart.cc/reppoor/telegram-bot-ddns.svg?variant=adaptive)](https://starchart.cc/reppoor/telegram-bot-ddns)
