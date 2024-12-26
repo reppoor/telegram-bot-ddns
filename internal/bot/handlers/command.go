@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
 	"strconv"
 	"strings"
 	"telegrambot/config"
@@ -146,6 +147,44 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
+		case "parse":
+			// 加载配置文件
+			db.InitDB()
+
+			// 获取所有域名信息
+			ALLDomain, err := repository.GetDomainInfo()
+			if err != nil {
+				fmt.Println("获取域名信息失败:", err)
+				return
+			}
+
+			// 存储拼接后的信息
+			var domainInfoList []string
+
+			// 遍历主域名
+			for domainName := range ALLDomain {
+				info, err := services.GetDomainInfo(domainName)
+				if err != nil {
+					log.Println("获取域名信息失败:", err)
+					continue
+				}
+
+				// 拼接单条域名信息
+				infoString := fmt.Sprintf("域名:`%s`\n转发域:`%s`\nIP:`%s`\n运营商:`%s`",
+					info.Domain, info.ForwardingDomain, info.IP, info.ISP)
+				domainInfoList = append(domainInfoList, infoString)
+			}
+
+			// 将所有信息拼接成一句话
+			finalSentence := strings.Join(domainInfoList, "\n----------\n")
+
+			// 输出拼接后的信息
+			fmt.Println("所有域名信息:", finalSentence)
+			messageText := fmt.Sprintf("*当前cloudflare的解析*:\n\n" + finalSentence) // 格式化消息内容，使用 Markdown 格式
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+			msg.ParseMode = "Markdown"
+			_, _ = bot.Send(msg)
+
 		default:
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "抱歉，我不识别这个命令。")
 			_, _ = bot.Send(msg)
