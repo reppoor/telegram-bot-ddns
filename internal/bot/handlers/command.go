@@ -197,7 +197,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
-		case "getIp":
+		case "getip":
 			fmt.Printf("getIp命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用getIp命令`") // 格式化消息内容，使用 Markdown 格式

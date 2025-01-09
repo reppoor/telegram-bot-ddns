@@ -98,7 +98,7 @@ info - 转发信息
 insert - 插入转发记录
 check - 检测连通性
 parse - 获取当前解析状态
-getIp - 一键获取转发IP
+getip - 批量获取转发ip
 ```
 在docker启动后首先点击该命令，否则无法使用
 ```
