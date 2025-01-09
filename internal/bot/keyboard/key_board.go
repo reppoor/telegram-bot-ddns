@@ -75,6 +75,7 @@ func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
 	// 定义按钮
 	buttons := []tgbotapi.InlineKeyboardButton{
 		tgbotapi.NewInlineKeyboardButtonData(BanText, fmt.Sprintf("%d-ban", ID)),
+		tgbotapi.NewInlineKeyboardButtonData("获取转发最新IP📶", fmt.Sprintf("%d-getIp", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("解析该条记录📶", fmt.Sprintf("%d-parse", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("检测并解析该条记录🔄", fmt.Sprintf("%d-checkAndParse", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("删除该条记录❌️", fmt.Sprintf("%d-del", ID)),

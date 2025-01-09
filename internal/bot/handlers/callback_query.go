@@ -97,6 +97,46 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				msg.ReplyMarkup = &keyBoard
 				// 发送消息
 				_, err = bot.Send(msg)
+			case "getIp":
+				fmt.Println("获取转发最新ip轮询，正在开发中....")
+				// 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("`正在获取最新IP...`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewEditMessageText(
+					update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+					update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+					messageText,                            // 新的消息文本
+				)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				DomainInfo, err := repository.GetDomainIDInfo(data)
+				if err != nil {
+					fmt.Println("查询数据库失败", err)
+					// 格式化消息内容，使用 Markdown 格式
+					messageText = fmt.Sprintf("`查询数据库失败`") // 格式化消息内容，使用 Markdown 格式
+					msg = tgbotapi.NewEditMessageText(
+						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+						update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+						messageText,                            // 新的消息文本
+					)
+					msg.ParseMode = "Markdown"
+					_, _ = bot.Send(msg)
+					return
+				}
+				newIP, err := services.ResolveDomainToIP(DomainInfo.ForwardingDomain) //获取转发IP
+				if err != nil {
+					fmt.Println("获取IP失败", err)
+					// 格式化消息内容，使用 Markdown 格式
+					messageText = fmt.Sprintf("`获取IP失败`") // 格式化消息内容，使用 Markdown 格式
+					msg = tgbotapi.NewEditMessageText(
+						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+						update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+						messageText,                            // 新的消息文本
+					)
+					msg.ParseMode = "Markdown"
+					_, _ = bot.Send(msg)
+					return
+				}
+				fmt.Println(newIP)
 			case "parse":
 				// 格式化消息内容，使用 Markdown 格式
 				messageText := fmt.Sprintf("`正在解析DNS记录...`") // 格式化消息内容，使用 Markdown 格式
