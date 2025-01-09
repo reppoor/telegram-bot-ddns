@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Config 配置加载逻辑
@@ -105,4 +106,5 @@ func findProjectRoot(startDir string) (string, error) {
 	}
 
 	return "", fmt.Errorf("项目根目录未找到")
+
 }

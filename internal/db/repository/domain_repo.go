@@ -229,3 +229,28 @@ func InsertDomainInfo(Domain string, ForwardingDomain string, Port int, ISP stri
 
 	return DomainInfo, nil
 }
+
+func GetDomainInfoByIp(Domain string, ip string) (domainInfo models.Domain, err error) {
+	domain := models.Domain{
+		Domain:           Domain,
+		ForwardingDomain: "",
+		IP:               ip,
+		Port:             0,
+		ISP:              "",
+	}
+
+	// 根据域名和IP查询记录
+	result := db.DB.Where("domain = ? AND ip = ?", Domain, ip).First(&domain)
+	if result.Error != nil {
+		if result.RowsAffected == 0 {
+			fmt.Println("未找到记录")
+		} else {
+			fmt.Printf("查询错误: %v\n", result.Error)
+		}
+		return domain, fmt.Errorf("查询错误: %v", err)
+	}
+
+	// 输出查询结果
+	//fmt.Printf("查询结果: %+v\n", domain)
+	return domain, nil
+}

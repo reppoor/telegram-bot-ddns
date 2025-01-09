@@ -91,15 +91,23 @@ docker pull reppoor/telegram-bot-ddns:latest && docker run -d -v /root/conf.yaml
 3.输入如下命令发送
 ```
 start - 开始
+version - 当前版本
 id - 获取ID
 init - bot初始化
 info - 转发信息
 insert - 插入转发记录
 check - 检测连通性
+parse - 获取当前解析状态
 ```
 在docker启动后首先点击该命令，否则无法使用
 ```
 /init 进行初始化数据库，否则无法使用
 ```
-### Stargazers over time
+# 转发运营商收录清单
+
+### [池雨转发:t.me/chiyuzf](https://t.me/ddns_reppoor)
+
+
+
+# Stargazers over time
 [![Stargazers over time](https://starchart.cc/reppoor/telegram-bot-ddns.svg?variant=adaptive)](https://starchart.cc/reppoor/telegram-bot-ddns)
