@@ -148,8 +148,6 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 		case "parse":
-			// 加载配置文件
-			db.InitDB()
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用parse命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -157,6 +155,8 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(msg)
 				return
 			}
+			// 加载配置文件
+			db.InitDB()
 			// 获取所有域名信息
 			ALLDomain, err := repository.GetDomainInfo()
 			if err != nil {
