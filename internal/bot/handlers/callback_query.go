@@ -136,7 +136,33 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					_, _ = bot.Send(msg)
 					return
 				}
-				fmt.Println(newIP)
+				newDomainIp, err := repository.UpdateDomainIp(data, newIP)
+				if err != nil {
+					fmt.Println("更新数据库IP失败", err)
+					return
+				}
+				ID := newDomainIp.ID
+				Domain := newDomainIp.Domain
+				ForwardingDomain := newDomainIp.ForwardingDomain
+				IP := newDomainIp.IP
+				Port := newDomainIp.Port
+				ISP := newDomainIp.ISP
+				Ban := newDomainIp.Ban
+				// 格式化消息内容，使用 Markdown 格式
+				messageText = fmt.Sprintf(
+					"*获取最新IP成功*✅\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`",
+					ID, Domain, ForwardingDomain, IP, Port, ISP, Ban,
+				) // 格式化消息内容，使用 Markdown 格式
+				fmt.Println(messageText)
+				msg = tgbotapi.NewEditMessageText(
+					update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
+					update.CallbackQuery.Message.MessageID, // 要编辑的消息的 ID
+					messageText,                            // 新的消息文本
+				)
+				msg.ParseMode = "Markdown"
+				// 创建按钮
+				msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
+				_, err = bot.Send(msg)
 			case "parse":
 				// 格式化消息内容，使用 Markdown 格式
 				messageText := fmt.Sprintf("`正在解析DNS记录...`") // 格式化消息内容，使用 Markdown 格式

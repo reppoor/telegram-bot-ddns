@@ -98,15 +98,15 @@ info - 转发信息
 insert - 插入转发记录
 check - 检测连通性
 parse - 获取当前解析状态
+getIp - 一键获取转发IP
 ```
 在docker启动后首先点击该命令，否则无法使用
 ```
 /init 进行初始化数据库，否则无法使用
 ```
-# 转发运营商收录清单
+# 转发运营商收录清单(持续更新中)
 
-### [池雨转发:t.me/chiyuzf](https://t.me/ddns_reppoor)
-
+### [池雨转发:t.me/chiyuzf](https://t.me/ddns_reppoor)  (开户要求:无。50/T)
 
 
 # Stargazers over time

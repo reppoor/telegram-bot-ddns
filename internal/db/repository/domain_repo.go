@@ -254,3 +254,21 @@ func GetDomainInfoByIp(Domain string, ip string) (domainInfo models.Domain, err 
 	//fmt.Printf("查询结果: %+v\n", domain)
 	return domain, nil
 }
+
+func GetALLDomain() ([]models.Domain, error) {
+	// 查询所有数据
+	var domains []models.Domain
+	if err := db.DB.Find(&domains).Error; err != nil {
+		// 记录日志，但不终止程序
+		log.Printf("查询数据失败: %v", err)
+		return nil, err
+	}
+
+	// 检查是否查询到结果
+	if len(domains) == 0 {
+		log.Println("没有找到任何域名数据")
+		return nil, nil
+	}
+
+	return domains, nil
+}

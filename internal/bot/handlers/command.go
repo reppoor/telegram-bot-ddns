@@ -25,12 +25,14 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 	if update.Message.IsCommand() {
 		switch update.Message.Command() {
 		case "start":
+			fmt.Printf("start命令\n")
 			messageText := fmt.Sprintf("您好，很高兴为您服务") // 格式化消息内容，使用 Markdown 格式
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 			return
 		case "id":
+			fmt.Printf("id命令\n")
 			// 格式化消息内容，使用 Markdown 格式
 			messageText := fmt.Sprintf("用户ID: `%d`\n名字: `%s`\n姓氏: `%s`\n用户名: [%s](https://t.me/%s)\n语言设置: `%s`", ID, FirstName, LastName, UserName, UserName, LanguageCode) // 格式化消息内容，使用 Markdown 格式
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -38,6 +40,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, _ = bot.Send(msg)
 			return
 		case "init":
+			fmt.Printf("init命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用init命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -68,6 +71,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, _ = bot.Send(editMsg)
 			return
 		case "info":
+			fmt.Printf("info命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用info命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -92,6 +96,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			_, err = bot.Send(msg)
 			return
 		case "check":
+			fmt.Printf("check命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -102,7 +107,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			services.ALLCheckTCPConnectivity(bot, update, true)
 			return
 		case "insert":
-			fmt.Printf("插入命令\n")
+			fmt.Printf("insert命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用insert命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -143,11 +148,13 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			fmt.Println(info)
 			return
 		case "version":
+			fmt.Printf("version命令\n")
 			messageText := fmt.Sprintf("`当前BOT版本1.0.0`") // 格式化消息内容，使用 Markdown 格式
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 		case "parse":
+			fmt.Printf("parse命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用parse命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -190,7 +197,77 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
+		case "getIp":
+			fmt.Printf("getIp命令\n")
+			if ID != Config.Telegram.Id {
+				messageText := fmt.Sprintf("`您无法使用getIp命令`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
+			messageText := fmt.Sprintf("`处理进度: %s\n开始写入转发IP...`", "0%") // 格式化消息内容，使用 Markdown 格式
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+			msg.ParseMode = "Markdown"
+			sentMessage, _ := bot.Send(msg)
+			// 连接数据库
+			db.InitDB()
+			// 获取所有域名信息
+			Domains, err := repository.GetALLDomain()
+			if err != nil {
+				fmt.Println("获取域名信息失败:", err)
+				messageText = fmt.Sprintf("`获取域名信息失败`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
+				msg.ParseMode = "Markdown"
+				sentMessage, _ = bot.Send(msg)
+				return
+			}
+			if Domains == nil {
+				log.Println("没有任何域名数据")
+				messageText = fmt.Sprintf("`没有任何域名数据`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
+				msg.ParseMode = "Markdown"
+				sentMessage, _ = bot.Send(msg)
+				return
+			}
+			// 获取总域名数量
+			totalDomains := len(Domains)
 
+			// 遍历 domains 列表
+			for i, domain := range Domains {
+				newIP, err := services.ResolveDomainToIP(domain.ForwardingDomain)
+				if err != nil {
+					messageText := fmt.Sprintf("域名:`%s`解析IP失败", domain.ForwardingDomain)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+					msg.ParseMode = "Markdown"
+					_, _ = bot.Send(msg)
+					continue
+				}
+
+				idStr := fmt.Sprintf("%d", domain.ID)
+				_, err = repository.UpdateDomainIp(idStr, newIP)
+				if err != nil {
+					messageText := fmt.Sprintf("域名:`%s`更新到数据库失败", domain.ForwardingDomain)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+					msg.ParseMode = "Markdown"
+					_, _ = bot.Send(msg)
+					continue
+				}
+
+				// 计算进度
+				progress := int(float64(i+1) / float64(totalDomains) * 100)
+
+				// 创建更新的消息内容
+				var messageText string
+				if progress == 100 {
+					messageText = fmt.Sprintf("已完成: `%d%%`\n域名:`%s`\n转发IP:`%s`\n更新成功✅️", progress, domain.ForwardingDomain, newIP)
+				} else {
+					messageText = fmt.Sprintf("处理进度: `%d%%`\n域名:`%s`\n转发IP:`%s`\n更新成功✅️", progress, domain.ForwardingDomain, newIP)
+				}
+				editProgressMsg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
+				editProgressMsg.ParseMode = "Markdown"
+				_, _ = bot.Send(editProgressMsg)
+			}
 		default:
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "抱歉，我不识别这个命令。")
 			_, _ = bot.Send(msg)
