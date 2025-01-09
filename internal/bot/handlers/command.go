@@ -39,7 +39,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			return
 		case "init":
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("`您无法使用init命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -69,7 +69,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			return
 		case "info":
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("`您无法使用info命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -104,7 +104,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		case "insert":
 			fmt.Printf("插入命令\n")
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("`您无法使用insert命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -150,7 +150,13 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		case "parse":
 			// 加载配置文件
 			db.InitDB()
-
+			if ID != Config.Telegram.Id {
+				messageText := fmt.Sprintf("`您无法使用parse命令`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
 			// 获取所有域名信息
 			ALLDomain, err := repository.GetDomainInfo()
 			if err != nil {
