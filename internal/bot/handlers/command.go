@@ -98,7 +98,7 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		case "check":
 			fmt.Printf("check命令\n")
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用此命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("`您无法使用check命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -115,41 +115,91 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(msg)
 				return
 			}
+
 			// 获取命令部分（例如 /insert）
 			command := update.Message.Command()
 			// 提取命令后面的部分（参数）
 			params := strings.TrimSpace(update.Message.Text[len(command)+1:]) // 去掉 "/insert " 部分
+
+			// 参数格式验证
 			_, err := utils.ValidateFormat(params)
 			if err != nil {
-				messageText := fmt.Sprintf("*请参考改格式:*`www.baidu.com#www.hao123.com#7890#运营商`\n*非法格式详情:*`%s`", err) // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf("*请参考格式:*\n"+
+					"*格式说明:*\n"+
+					"`主域名#转发域名#转发端口#运营商`\n"+
+					"*单条记录格式:*\n"+
+					"`www.baidu.com#www.hao123.com#7890#运营商`\n"+
+					"*批量记录格式转发域名用`|`分隔:*\n"+
+					"`www.baidu.com#www.hao123.com|www.4399.com#7890#运营商A|运营商B`\n"+
+					"*非法格式详情:*\n"+
+					"`%s`", err) // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
 				fmt.Println(err)
 				return
 			}
+			// 解析参数
 			fmt.Printf(params + "\n")
-			DomainInfo := strings.Split(params, "#")
-			port, err := strconv.Atoi(DomainInfo[2])
-			db.InitDB() //连接数据库
-			info, err := repository.InsertDomainInfo(DomainInfo[0], DomainInfo[1], port, DomainInfo[3])
+			parts := strings.Split(params, "#")
+			// 获取主要域名和需要遍历的域名列表
+			primaryDomain := strings.TrimSpace(parts[0]) // 主要域名
+			domainList := strings.Split(parts[1], "|")   // 遍历的域名
+			port, err := strconv.Atoi(parts[2])          // 端口号
 			if err != nil {
-				messageText := fmt.Sprintf("插入一条转发记录失败❌️️") // 格式化消息内容，使用 Markdown 格式
+				messageText := "*端口号格式错误，请输入数字*"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
-				fmt.Println(err)
 				return
 			}
-			messageText := fmt.Sprintf("插入一条转发记录成功✅️") // 格式化消息内容，使用 Markdown 格式
+
+			// 处理运营商字段
+			operatorList := strings.Split(parts[3], "|")
+
+			// 检查域名和运营商是否一一对应
+			if len(domainList) != len(operatorList) {
+				messageText := "*格式错误:* `域名列表和运营商列表数量不匹配，请检查`\n例如: \n`www.baidu.com#www.hao123.com|www.4399.com#7890#运营商A|运营商B`"
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
+
+			// 初始化数据库连接
+			db.InitDB()
+
+			// 插入域名和对应的运营商
+			var successCount, failCount int
+			for i, domain := range domainList {
+				domain = strings.TrimSpace(domain)
+				operator := strings.TrimSpace(operatorList[i])
+				if domain == "" {
+					continue
+				}
+				if operator == "" {
+					operator = "未备注" // 默认值
+				}
+
+				info, err := repository.InsertDomainInfo(primaryDomain, domain, port, operator)
+				if err != nil {
+					fmt.Printf("插入域名 %s 失败: %v\n", domain, err)
+					failCount++
+				} else {
+					fmt.Printf("插入域名 %s 成功: %v\n", domain, info)
+					successCount++
+				}
+			}
+
+			// 返回操作结果
+			messageText := fmt.Sprintf("插入完成✅️\n成功: %d 条\n失败: %d 条", successCount, failCount)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
-			fmt.Println(info)
 			return
 		case "version":
 			fmt.Printf("version命令\n")
-			messageText := fmt.Sprintf("`当前BOT版本1.0.0`") // 格式化消息内容，使用 Markdown 格式
+			messageText := fmt.Sprintf("`当前BOT版本1.0.1`") // 格式化消息内容，使用 Markdown 格式
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
