@@ -110,7 +110,7 @@ func TelegramApp() {
 			log.Panic(err)
 		}
 	} else {
-		bot, err = tgbotapi.NewBotAPI(Config.Telegram.Token)
+		bot, err = tgbotapi.NewBotAPIWithAPIEndpoint(Config.Telegram.Token, Config.Telegram.ApiEndpoint+"/bot%s/%s")
 		if err != nil {
 			log.Panic(err)
 		}
