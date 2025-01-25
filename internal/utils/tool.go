@@ -32,11 +32,11 @@ func ValidateFormat(params string) (bool, error) {
 	return true, nil
 }
 
-// isValidDomain 验证域名格式是否正确（只允许出现两个点）
+// isValidDomain 验证域名格式是否正确（支持根域名和二级域名）
 func isValidDomain(domain string) bool {
-	// 正则表达式检查: 子域名.主域名.顶级域名
-	// 举例: www.baidu.com, sub.example.org
-	regex := `^[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$`
+	// 正则表达式检查: 根域名 或 二级域名
+	// 举例: example.com, sub.example.com
+	regex := `^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$`
 	match, err := regexp.MatchString(regex, domain)
 	if err != nil {
 		// 如果正则匹配出错，认为域名无效
