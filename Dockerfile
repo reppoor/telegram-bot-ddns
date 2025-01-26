@@ -12,7 +12,7 @@ RUN apk add --no-cache gcc musl-dev
 WORKDIR /app
 
 # 从 GitHub 下载仓库并解压
-RUN curl -L https://gh.api.99988866.xyz/https://github.com/reppoor/telegram-bot-ddns/archive/refs/heads/master.zip -o telegram-bot-ddns-master.zip \
+RUN curl -L https://github.com/reppoor/telegram-bot-ddns/archive/refs/heads/master.zip -o telegram-bot-ddns-master.zip \
     && unzip telegram-bot-ddns-master.zip \
     && rm telegram-bot-ddns-master.zip
 
