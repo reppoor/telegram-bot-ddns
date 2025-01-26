@@ -207,9 +207,9 @@ func UpdateDomainBan(ID string, Ban bool) (models.Domain, error) {
 func InsertDomainInfo(Domain string, ForwardingDomain string, Port int, ISP string) (models.Domain, error) {
 	// 先查询数据库，检查是否存在相同的 ForwardingDomain 和 Port 组合
 	var existingDomain models.Domain
-	if err := db.DB.Where("forwarding_domain = ? AND port = ?", ForwardingDomain, Port).First(&existingDomain).Error; err == nil {
+	if err := db.DB.Where("Domain = ? AND forwarding_domain = ? AND port = ?", Domain, ForwardingDomain, Port).First(&existingDomain).Error; err == nil {
 		// 如果存在记录，则返回错误，表示该记录已经存在
-		return models.Domain{}, fmt.Errorf("已存在转发域名 '%s' and 端口 '%d", ForwardingDomain, Port)
+		return models.Domain{}, fmt.Errorf("已存在域名 '%s' 转发域名 '%s' and 端口 '%d", Domain, ForwardingDomain, Port)
 	} else if err != gorm.ErrRecordNotFound {
 		// 如果发生了其他错误（非记录未找到），则返回错误
 		return models.Domain{}, fmt.Errorf("非记录未找到info: %v", err)
