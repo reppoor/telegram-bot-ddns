@@ -41,7 +41,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		Port := DomainInfo.Port
 		ISP := DomainInfo.ISP
 		Ban := DomainInfo.Ban
-		BanTime := DomainInfo.BanTime + Config.BanTime.CheckTime
+		BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
 		Weight := DomainInfo.Weight
 		// 格式化消息内容，使用 Markdown 格式
 		formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
@@ -175,7 +175,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				Port := newDomainIp.Port
 				ISP := newDomainIp.ISP
 				Ban := newDomainIp.Ban
-				BanTime := newDomainIp.BanTime + Config.BanTime.CheckTime
+				BanTime := newDomainIp.BanTime + Config.BanTime.UnBanTime
 				Weight := newDomainIp.Weight
 				formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
 				// 格式化消息内容，使用 Markdown 格式
@@ -259,7 +259,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				Port := newDomainIp.Port
 				ISP := newDomainIp.ISP
 				Ban := newDomainIp.Ban
-				BanTime := newDomainIp.BanTime + Config.BanTime.CheckTime
+				BanTime := newDomainIp.BanTime + Config.BanTime.UnBanTime
 				Weight := newDomainIp.Weight
 				formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
 				// 格式化消息内容，使用 Markdown 格式
@@ -365,7 +365,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				Port := newDomainIp.Port
 				ISP := newDomainIp.ISP
 				Ban := newDomainIp.Ban
-				BanTime := newDomainIp.BanTime + Config.BanTime.CheckTime
+				BanTime := newDomainIp.BanTime + Config.BanTime.UnBanTime
 				Weight := newDomainIp.Weight
 				formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
 				// 格式化消息内容，使用 Markdown 格式
@@ -409,7 +409,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					Port := DomainInfo.Port
 					ISP := DomainInfo.ISP
 					Ban := DomainInfo.Ban
-					BanTime := DomainInfo.BanTime + Config.BanTime.CheckTime
+					BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
 					Weight := DomainInfo.Weight
 					// 格式化消息内容，使用 Markdown 格式
 					formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
@@ -442,7 +442,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					Port := DomainInfo.Port
 					ISP := DomainInfo.ISP
 					Ban := DomainInfo.Ban
-					BanTime := DomainInfo.BanTime + Config.BanTime.CheckTime
+					BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
 					Weight := DomainInfo.Weight
 					// 格式化消息内容，使用 Markdown 格式
 					formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
@@ -628,7 +628,7 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprintf("✅ 权重设置成功：ID %s → 权重 %d", idStr, weight)))
 			} else {
 				// 计算解禁时间
-				banTime := DomainInfo.BanTime + Config.BanTime.CheckTime
+				banTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
 				formattedTime := time.Unix(banTime, 0).Format("2006-01-02 15:04:05")
 
 				// 拼接详细消息文本
