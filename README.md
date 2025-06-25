@@ -62,7 +62,7 @@ network:
 check:
   ip_check_time : 3 # 单位秒Second
   check_time: 10 #单位分钟Minute (建议超过5分钟，否则报错)
- BanTime:
+BanTime:
   check_time : 60 # 单位秒Second封禁时间检查频度 (建议超过1分钟，否则报错)
   un_ban_time: 600 #单位秒Second超过封禁当时的时间多少秒解除封禁 (建议超过5分钟，否则报错)
 ```
