@@ -226,6 +226,76 @@ func UpdateDomainDelete(ID string, Delete bool) (models.Domain, error) {
 	return domain, nil
 }
 
+func UpdateDomainBanTime(ID string, timestamp int64) (models.Domain, error) {
+	// 提取 ID 的数字部分（如存在 "-"）
+	numericID := ID
+	if strings.Contains(ID, "-") {
+		idParts := strings.Split(ID, "-")
+		if len(idParts) > 0 {
+			numericID = idParts[0]
+		}
+	}
+
+	// 转换字符串 ID 为 uint
+	uintID, err := strconv.ParseUint(numericID, 10, 32)
+	if err != nil {
+		fmt.Printf("无效的ID格式: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	// 查找目标域名记录
+	var domain models.Domain
+	result := db.DB.First(&domain, uint(uintID))
+	if result.Error != nil {
+		fmt.Printf("查询失败: %v\n", result.Error)
+		return models.Domain{}, result.Error
+	}
+
+	// 设置封禁时间戳（可设置为 0 表示清空）
+	domain.BanTime = timestamp
+	updateResult := db.DB.Save(&domain)
+	if updateResult.Error != nil {
+		fmt.Printf("更新失败: %v\n", updateResult.Error)
+		return models.Domain{}, updateResult.Error
+	}
+
+	return domain, nil
+}
+
+func UpdateDomainWeight(ID string, weight int) (models.Domain, error) {
+	// 处理 ID 中可能含有 "-" 的情况，只取前半部分作为主键
+	numericID := ID
+	if strings.Contains(ID, "-") {
+		parts := strings.Split(ID, "-")
+		if len(parts) > 0 {
+			numericID = parts[0]
+		}
+	}
+
+	// 字符串转 uint（GORM 主键推荐用 uint）
+	uintID, err := strconv.ParseUint(numericID, 10, 32)
+	if err != nil {
+		fmt.Printf("无效的ID格式: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	// 查询目标记录
+	var domain models.Domain
+	if err := db.DB.First(&domain, uint(uintID)).Error; err != nil {
+		fmt.Printf("查询失败: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	// 更新 weight 字段
+	domain.Weight = weight
+	if err := db.DB.Save(&domain).Error; err != nil {
+		fmt.Printf("更新失败: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	return domain, nil
+}
+
 func InsertDomainInfo(Domain string, ForwardingDomain string, Port int, ISP string) (models.Domain, error) {
 	// 先查询数据库，检查是否存在相同的 ForwardingDomain 和 Port 组合
 	var existingDomain models.Domain

@@ -141,7 +141,7 @@ func TelegramApp() {
 			}
 		}
 	}()
-
+	go services.AutoUnbanRoutine(Config)
 	//轮询消息
 	for update := range updates {
 		// 异步处理回调查询
@@ -152,6 +152,7 @@ func TelegramApp() {
 		// 仅处理包含消息的更新
 		if update.Message != nil {
 			go handlers.HandleCommand(bot, update, Config)
+			go handlers.HandleMessage(bot, update, Config)
 			continue
 		}
 	}

@@ -48,7 +48,12 @@ func GenerateMainMenuKeyboard(domains []models.Domain) tgbotapi.InlineKeyboardMa
 	var keyboard InlineKeyboard
 
 	for _, domain := range domains {
-		buttonText := fmt.Sprintf("%s - %s - %d - %t", domain.Domain, domain.ForwardingDomain, domain.Port, domain.Ban)
+		// 设置按钮文本
+		BanText := "✅️"
+		if domain.Ban {
+			BanText = "❌️️"
+		}
+		buttonText := fmt.Sprintf("%s - %s - %d - %s", domain.Domain, domain.ForwardingDomain, domain.Port, BanText)
 		callbackData := fmt.Sprintf("%d", domain.ID)
 
 		button := Button{
@@ -98,6 +103,7 @@ func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
 	// 定义按钮
 	buttons := []tgbotapi.InlineKeyboardButton{
 		tgbotapi.NewInlineKeyboardButtonData(BanText, fmt.Sprintf("%d-ban", ID)),
+		tgbotapi.NewInlineKeyboardButtonData("设置权重", fmt.Sprintf("%d-weight", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("获取转发最新IP🔝", fmt.Sprintf("%d-getIp", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("解析该条记录📶", fmt.Sprintf("%d-parse", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("检测并解析该条记录🔄", fmt.Sprintf("%d-checkAndParse", ID)),

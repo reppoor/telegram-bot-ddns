@@ -10,6 +10,9 @@ type Domain struct {
 	ISP              string `gorm:"size:255"`      // 运营商
 	Ban              bool   `gorm:"default:false"` // 是否启用
 	Del              bool   `gorm:"default:false"` // 是否删除
+	Weight           int    `gorm:"default:0"`     // 权重，默认值为0
+	BanTime          int64  `gorm:"default:0"`     // 记录封禁时的 Unix 时间戳，0 表示未封禁或未记录
+
 }
 type TelegramPermission struct {
 	ID         uint   `gorm:"primaryKey"`        // 主键

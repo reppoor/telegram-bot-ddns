@@ -48,6 +48,10 @@ type Config struct {
 		IpCheckTime int `yaml:"ip_check_time"` // 每秒检测时间
 		CheckTime   int `yaml:"check_time"`    // 每分钟检测时间
 	} `yaml:"check"`
+	BanTime struct {
+		CheckTime int64 `yaml:"check_time"`  // 每秒检测时间
+		UnBanTime int64 `yaml:"un_ban_time"` // 每分钟检测时间
+	} `yaml:"BanTime"`
 }
 
 // LoadConfig 加载 YAML 配置文件
