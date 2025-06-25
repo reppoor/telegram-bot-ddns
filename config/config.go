@@ -2,12 +2,18 @@ package config
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 	"path/filepath"
-
-	"gopkg.in/yaml.v3"
 )
+
+func tes(te int) string {
+	if te == 1 {
+		return "/testconf.yaml"
+	}
+	return "/conf.yaml"
+}
 
 // Config 配置加载逻辑
 type Config struct {
@@ -64,7 +70,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 	//filePath = filepath.Join(filepath.Dir(rootDir), "conf.yaml") // 默认文件名
 	//fmt.Println(rootDir + "/conf.yaml") //打印conf.yaml路径情况，进行调试
-	file, err := os.Open(rootDir + "/conf.yaml")
+	file, err := os.Open(rootDir + tes(0))
 	if err != nil {
 		log.Printf("无法打开配置文件 %s: %v", filePath, err)
 		return nil, err

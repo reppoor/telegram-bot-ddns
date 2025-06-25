@@ -104,6 +104,17 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(msg)
 				return
 			}
+			// 获取所有域名信息，假设按ID排序
+			db.InitDB()
+			_, err := repository.GetDomainInfo()
+			if err != nil {
+				fmt.Println("获取域名信息失败:", err)
+				messageText := fmt.Sprintf("数据库未查询到任何域名记录❌️") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
 			services.ALLCheckTCPConnectivity(bot, update, true)
 			return
 		case "insert":
@@ -115,12 +126,10 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(msg)
 				return
 			}
-
 			// 获取命令部分（例如 /insert）
 			command := update.Message.Command()
 			// 提取命令后面的部分（参数）
 			params := strings.TrimSpace(update.Message.Text[len(command)+1:]) // 去掉 "/insert " 部分
-
 			// 参数格式验证
 			_, err := utils.ValidateFormat(params)
 			if err != nil {
@@ -207,49 +216,64 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		case "parse":
 			fmt.Printf("parse命令\n")
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用parse命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := "`您无法使用parse命令`"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
 				return
 			}
-			// 加载配置文件
+
 			db.InitDB()
-			// 获取所有域名信息
-			ALLDomain, err := repository.GetDomainInfo()
+
+			// 获取所有域名信息，假设按ID排序
+			allDomains, err := repository.GetDomainInfo()
 			if err != nil {
 				fmt.Println("获取域名信息失败:", err)
+				messageText := fmt.Sprintf("数据库未查询到任何域名记录❌️") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
 				return
 			}
 
-			// 存储拼接后的信息
+			// 用切片和map记录去重的主域名，保证顺序固定
+			var orderedDomains []string
+			domainSet := make(map[string]struct{})
+
+			for _, d := range allDomains {
+				if _, exists := domainSet[d.Domain]; !exists {
+					domainSet[d.Domain] = struct{}{}
+					orderedDomains = append(orderedDomains, d.Domain)
+				}
+			}
+
 			var domainInfoList []string
 
-			// 遍历主域名
-			for domainName := range ALLDomain {
+			for _, domainName := range orderedDomains {
 				info, err := services.GetDomainInfo(domainName)
 				if err != nil {
-					log.Println("获取域名信息失败:", err)
+					log.Printf("获取域名 %s 信息失败: %v\n", domainName, err)
 					continue
 				}
 
-				// 拼接单条域名信息
-				infoString := fmt.Sprintf("域名:`%s`\n转发域:`%s`\nIP:`%s`\n运营商:`%s`",
-					info.Domain, info.ForwardingDomain, info.IP, info.ISP)
+				infoString := fmt.Sprintf(
+					"域名:`%s`\n转发域:`%s`\nIP:`%s`\n运营商:`%s`",
+					info.Domain, info.ForwardingDomain, info.IP, info.ISP,
+				)
 				domainInfoList = append(domainInfoList, infoString)
 			}
 
-			// 将所有信息拼接成一句话
 			finalSentence := strings.Join(domainInfoList, "\n----------\n")
+			if finalSentence == "" {
+				finalSentence = "_没有可用的域名数据_"
+			}
 
-			// 输出拼接后的信息
-			fmt.Println("所有域名信息:", finalSentence)
-			messageText := fmt.Sprintf("*当前cloudflare的解析*:\n\n" + finalSentence) // 格式化消息内容，使用 Markdown 格式
+			messageText := "*当前cloudflare的解析*:\n\n" + finalSentence
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 		case "getip":
-			fmt.Printf("getIp命令\n")
+			fmt.Printf("getip命令\n")
 			if ID != Config.Telegram.Id {
 				messageText := fmt.Sprintf("`您无法使用getIp命令`") // 格式化消息内容，使用 Markdown 格式
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -319,6 +343,33 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				editProgressMsg.ParseMode = "Markdown"
 				_, _ = bot.Send(editProgressMsg)
 			}
+		case "delete":
+			fmt.Printf("delete命令\n")
+			if ID != Config.Telegram.Id {
+				messageText := fmt.Sprintf("`您无法使用delete命令`") // 格式化消息内容，使用 Markdown 格式
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.ParseMode = "Markdown"
+				_, _ = bot.Send(msg)
+				return
+			}
+			db.InitDB()
+			DomainInfo, err := repository.GetDomainInfo()
+			if err != nil {
+				fmt.Println(err)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID,
+					"数据库未查询到任何域名记录❌️") // 要编辑的消息的 ID
+				// 发送消息
+				_, err = bot.Send(msg)
+				return
+			}
+			keyBoard := keyboard.GenerateMainMenuDeleteKeyboard(DomainInfo) //生成内联键盘
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "请选择删除的转发记录\n"+
+				"✅️=删除\n"+
+				"🚫=不删")
+			msg.ReplyMarkup = keyBoard
+			// 发送消息
+			_, err = bot.Send(msg)
+			return
 		default:
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "抱歉，我不识别这个命令。")
 			_, _ = bot.Send(msg)

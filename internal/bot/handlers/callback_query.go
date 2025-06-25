@@ -14,6 +14,7 @@ import (
 func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.Config) {
 
 	data := update.CallbackQuery.Data
+	fmt.Printf(data)
 	// 将回调数据按 '-' 分隔，判断菜单层级
 	levels := strings.Split(data, "-")
 
@@ -52,7 +53,6 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		if len(levels) > 1 {
 			ID := levels[0]
 			action := levels[1]
-
 			switch action {
 			case "del":
 				// 处理删除操作
@@ -462,10 +462,100 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				)
 				// 发送删除消息的请求
 				_, _ = bot.Send(msg)
+			case "delete":
+				fmt.Println("删除操作, delete:", ID)
+				// 处理批量删除操作
+				fmt.Println("执行是否删除操作, ID:", data)
+				db.InitDB() //连接数据库
+				DomainInfo, err := repository.GetDomainIDInfo(data)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				del := DomainInfo.Del
+				if del {
+					NewDelStatus := !DomainInfo.Del
+					_, err := repository.UpdateDomainDelete(data, NewDelStatus)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
 
+				} else {
+					NewDelStatus := !DomainInfo.Del
+					_, err := repository.UpdateDomainDelete(data, NewDelStatus)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+				}
+				GetDomainInfo, err := repository.GetDomainInfo()
+				if err != nil {
+					fmt.Println(err)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID,
+						"数据库未查询到任何域名记录❌️") // 要编辑的消息的 ID
+					// 发送消息
+					_, err = bot.Send(msg)
+					return
+				}
+				// 第一步：生成消息文本和按钮
+				text := "请选择删除的转发记录\n" +
+					"✅️=删除\n" +
+					"🚫=不删" // 或你要显示的文本
+				keyboardMarkup := keyboard.GenerateMainMenuDeleteKeyboard(GetDomainInfo) // 返回 tgbotapi.InlineKeyboardMarkup
+
+				// 第二步：编辑消息文本
+				edit := tgbotapi.NewEditMessageText(
+					update.CallbackQuery.Message.Chat.ID,
+					update.CallbackQuery.Message.MessageID,
+					text, // 这里是文本，不是 keyboardMarkup
+				)
+				edit.ParseMode = "Markdown"
+
+				// 第三步：附加内联键盘（ReplyMarkup）
+				edit.ReplyMarkup = &keyboardMarkup
+
+				// 第四步：发送编辑请求
+				_, err = bot.Send(edit)
+				return
+			case "confirmDel":
+				fmt.Println("确认删除操作, confirmDel:", ID)
+				db.InitDB() //连接数据库
+				err := repository.DeleteAllMarkedDomains()
+				if err != nil {
+					return
+				}
+				GetDomainInfo, err := repository.GetDomainInfo()
+				if err != nil {
+					fmt.Println(err)
+					msg := tgbotapi.NewEditMessageText(
+						update.CallbackQuery.Message.Chat.ID, // 原始消息的聊天 ID
+						update.CallbackQuery.Message.MessageID,
+						"数据库未查询到任何域名记录❌️") // 要编辑的消息的 ID
+					// 发送消息
+					_, err = bot.Send(msg)
+					return
+				}
+				// 第一步：生成消息文本和按钮
+				text := "✅️已删除"
+				keyboardMarkup := keyboard.GenerateMainMenuDeleteKeyboard(GetDomainInfo) // 返回 tgbotapi.InlineKeyboardMarkup
+
+				// 第二步：编辑消息文本
+				edit := tgbotapi.NewEditMessageText(
+					update.CallbackQuery.Message.Chat.ID,
+					update.CallbackQuery.Message.MessageID,
+					text, // 这里是文本，不是 keyboardMarkup
+				)
+				edit.ParseMode = "Markdown"
+
+				// 第三步：附加内联键盘（ReplyMarkup）
+				edit.ReplyMarkup = &keyboardMarkup
+
+				// 第四步：发送编辑请求
+				_, err = bot.Send(edit)
+				return
 			}
 		}
-
 		fmt.Println("当前是2级菜单")
 	case 3:
 		fmt.Println("当前是3级菜单")

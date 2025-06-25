@@ -4,51 +4,35 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 	"telegrambot/internal/db"
 	"telegrambot/internal/db/models"
 )
 
-func GetDomainInfo() (map[string]map[string]map[string]interface{}, error) {
-	// 查询所有数据
+func GetDomainInfo() ([]models.Domain, error) {
 	var domains []models.Domain
+
+	// 查询数据库
 	if err := db.DB.Find(&domains).Error; err != nil {
 		log.Fatalf("查询数据失败: %v", err)
 		return nil, err
 	}
 
-	// 如果数据库中没有数据，返回自定义错误
+	// 如果没有数据，返回错误
 	if len(domains) == 0 {
 		err := fmt.Errorf("数据库中没有域名数据")
 		log.Println(err)
 		return nil, err
 	}
 
-	// 用于存储合并后的结果，map结构：Domain -> ForwardingDomain -> 详情
-	domainMap := make(map[string]map[string]map[string]interface{})
+	// 按 ID 排序
+	sort.Slice(domains, func(i, j int) bool {
+		return domains[i].ID < domains[j].ID
+	})
 
-	// 遍历所有数据并进行合并
-	for _, domain := range domains {
-		// 如果该 Domain 不存在，初始化它
-		if _, exists := domainMap[domain.Domain]; !exists {
-			domainMap[domain.Domain] = make(map[string]map[string]interface{})
-		}
-
-		// 如果该 ForwardingDomain 不存在，初始化它
-		if _, exists := domainMap[domain.Domain][domain.ForwardingDomain]; !exists {
-			domainMap[domain.Domain][domain.ForwardingDomain] = make(map[string]interface{})
-		}
-
-		// 将 ID, IP, Port, ISP, Ban 添加到合适的位置
-		domainMap[domain.Domain][domain.ForwardingDomain]["ID"] = domain.ID
-		domainMap[domain.Domain][domain.ForwardingDomain]["IP"] = domain.IP
-		domainMap[domain.Domain][domain.ForwardingDomain]["Port"] = domain.Port
-		domainMap[domain.Domain][domain.ForwardingDomain]["ISP"] = domain.ISP
-		domainMap[domain.Domain][domain.ForwardingDomain]["Ban"] = domain.Ban
-	}
-
-	return domainMap, nil
+	return domains, nil
 }
 
 func GetDomainIDInfo(ID string) (domainInfo models.Domain, err error) {
@@ -192,8 +176,46 @@ func UpdateDomainBan(ID string, Ban bool) (models.Domain, error) {
 		return models.Domain{}, result.Error
 	}
 
-	// 更新IP地址
+	// 更新Ban状态地址
 	domain.Ban = Ban
+	updateResult := db.DB.Save(&domain)
+	if updateResult.Error != nil {
+		fmt.Printf("更新失败: %v\n", updateResult.Error)
+		return models.Domain{}, updateResult.Error
+	}
+
+	// 返回更新后的记录
+	return domain, nil
+}
+
+func UpdateDomainDelete(ID string, Delete bool) (models.Domain, error) {
+	// 初始化默认值
+	var numericID = ID
+
+	// 检查并提取 ID 的数字部分（如果包含 "-"）
+	if strings.Contains(ID, "-") {
+		idParts := strings.Split(ID, "-")
+		if len(idParts) > 0 {
+			numericID = idParts[0] // 提取 "-" 前的部分
+		}
+	}
+	// 转换字符串 ID 为 uint 类型
+	uintID, err := strconv.ParseUint(numericID, 10, 32) // 将字符串ID转换为uint类型
+	if err != nil {
+		fmt.Printf("无效的ID格式: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	// 查找目标域名记录
+	var domain models.Domain
+	result := db.DB.First(&domain, uint(uintID))
+	if result.Error != nil {
+		fmt.Printf("查询失败: %v\n", result.Error)
+		return models.Domain{}, result.Error
+	}
+
+	// 更新Delete状态
+	domain.Del = Delete
 	updateResult := db.DB.Save(&domain)
 	if updateResult.Error != nil {
 		fmt.Printf("更新失败: %v\n", updateResult.Error)
@@ -271,4 +293,15 @@ func GetALLDomain() ([]models.Domain, error) {
 	}
 
 	return domains, nil
+}
+
+func DeleteAllMarkedDomains() error {
+	// 删除所有 Delete 字段为 true 的记录
+	result := db.DB.Where("del = ?", true).Delete(&models.Domain{})
+	if result.Error != nil {
+		return fmt.Errorf("删除标记为删除的域名失败: %v", result.Error)
+	}
+
+	fmt.Printf("已删除 %d 条标记为删除的域名记录\n", result.RowsAffected)
+	return nil
 }

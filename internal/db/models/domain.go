@@ -9,6 +9,7 @@ type Domain struct {
 	Port             int    `gorm:"size:255"`      // 端口
 	ISP              string `gorm:"size:255"`      // 运营商
 	Ban              bool   `gorm:"default:false"` // 是否启用
+	Del              bool   `gorm:"default:false"` // 是否删除
 }
 type TelegramPermission struct {
 	ID         uint   `gorm:"primaryKey"`        // 主键

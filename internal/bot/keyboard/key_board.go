@@ -3,6 +3,7 @@ package keyboard
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"telegrambot/internal/db/models"
 )
 
 // Button 单个按钮结构体
@@ -16,7 +17,7 @@ type InlineKeyboard struct {
 	Buttons [][]Button
 }
 
-func createInlineKeyboard(keyboard InlineKeyboard) tgbotapi.InlineKeyboardMarkup {
+func createInlineKeyboard(keyboard InlineKeyboard, class int) tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
 
 	// 使用 keyboard.Buttons 替代 buttons
@@ -28,40 +29,62 @@ func createInlineKeyboard(keyboard InlineKeyboard) tgbotapi.InlineKeyboardMarkup
 		}
 		rows = append(rows, row)
 	}
+	if class == 1 {
+		// 创建退出按钮并添加到最后一行
+		exitButton := tgbotapi.NewInlineKeyboardButtonData("退出🔚", "1-exit")
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{exitButton})
+	} else if class == 2 {
+		confirmButton := tgbotapi.NewInlineKeyboardButtonData("确认删除✅", "1-confirmDel")
+		exitButton := tgbotapi.NewInlineKeyboardButtonData("退出🔚", "1-exit")
 
-	// 创建退出按钮并添加到最后一行
-	exitButton := tgbotapi.NewInlineKeyboardButtonData("退出🔚", "1-exit")
-	rows = append(rows, []tgbotapi.InlineKeyboardButton{exitButton})
+		// 将确认和退出按钮放在同一行
+		rows = append(rows, tgbotapi.NewInlineKeyboardRow(confirmButton, exitButton))
+	}
 
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
 
-// GenerateMainMenuKeyboard 生成一级菜单按钮
-func GenerateMainMenuKeyboard(domainMap map[string]map[string]map[string]interface{}) tgbotapi.InlineKeyboardMarkup {
+func GenerateMainMenuKeyboard(domains []models.Domain) tgbotapi.InlineKeyboardMarkup {
 	var keyboard InlineKeyboard
 
-	for domainName, forwardingMap := range domainMap {
-		for forwardingDomain, details := range forwardingMap {
-			// 提取端口信息并格式化按钮文本
-			port := details["Port"]
-			ban, _ := details["Ban"].(bool)
-			buttonText := fmt.Sprintf("%s - %s - %v - %t", domainName, forwardingDomain, port, ban)
+	for _, domain := range domains {
+		buttonText := fmt.Sprintf("%s - %s - %d - %t", domain.Domain, domain.ForwardingDomain, domain.Port, domain.Ban)
+		callbackData := fmt.Sprintf("%d", domain.ID)
 
-			// 将回调数据设置为例如 ID
-			callbackData := fmt.Sprintf("%v", details["ID"])
-
-			// 创建按钮
-			button := Button{
-				Text:         buttonText,
-				CallbackData: callbackData,
-			}
-
-			// 将每个按钮作为单独一行（竖向排列）
-			keyboard.Buttons = append(keyboard.Buttons, []Button{button})
+		button := Button{
+			Text:         buttonText,
+			CallbackData: callbackData,
 		}
+
+		// 每个按钮单独一行
+		keyboard.Buttons = append(keyboard.Buttons, []Button{button})
 	}
 
-	return createInlineKeyboard(keyboard)
+	return createInlineKeyboard(keyboard, 1)
+}
+
+func GenerateMainMenuDeleteKeyboard(domains []models.Domain) tgbotapi.InlineKeyboardMarkup {
+	var keyboard InlineKeyboard
+
+	for _, domain := range domains {
+		delText := "🚫️"
+		if domain.Del {
+			delText = "✅️️"
+		}
+
+		buttonText := fmt.Sprintf("%s - %s - %s - %d", delText, domain.Domain, domain.ForwardingDomain, domain.Port)
+		callbackData := fmt.Sprintf("%d-delete", domain.ID)
+
+		button := Button{
+			Text:         buttonText,
+			CallbackData: callbackData,
+		}
+
+		// 每个按钮单独一行
+		keyboard.Buttons = append(keyboard.Buttons, []Button{button})
+	}
+
+	return createInlineKeyboard(keyboard, 2)
 }
 
 // GenerateSubMenuKeyboard 生成二级菜单按钮

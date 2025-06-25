@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"telegrambot/config"
 	"telegrambot/internal/db"
+	"telegrambot/internal/db/models"
 	"telegrambot/internal/db/repository"
 	"time"
 )
@@ -52,24 +53,34 @@ func ResolveDomainToIP(domain string) (string, error) {
 }
 
 func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shouldSend bool) bool {
-	db.InitDB() // 连接数据库
-	// 调用清除 DNS 缓存的函数
+	db.InitDB()
+
+	// 清除 DNS 缓存
 	if err := ClearDNSCache(); err != nil {
 		fmt.Println("错误:", err)
 	}
-	ALLDomain, err := repository.GetDomainInfo()
+
+	// 获取所有域名数据（按 ID 排序）
+	allDomains, err := repository.GetDomainInfo()
 	if err != nil {
 		fmt.Println("获取域名信息失败:", err)
 		return false
 	}
 
+	// 将同一个主域名的条目归类
+	grouped := make(map[string][]models.Domain)
+	var orderedDomainNames []string
+	for _, domain := range allDomains {
+		if _, ok := grouped[domain.Domain]; !ok {
+			orderedDomainNames = append(orderedDomainNames, domain.Domain)
+		}
+		grouped[domain.Domain] = append(grouped[domain.Domain], domain)
+	}
+
 	sendOrEditMessage := func(chatID int64, text string, messageID *int, isEdit bool, forceSend bool) {
-		// 如果是静默模式但 forceSend 为 true，强制发送消息
 		if shouldSend || forceSend {
 			if isEdit {
 				if *messageID == 0 {
-					// 如果 messageID 为 0，尝试发送新消息
-					fmt.Println("错误: 尝试编辑消息，但 messageID 为 0，发送新消息")
 					msg := tgbotapi.NewMessage(chatID, text)
 					msg.ParseMode = "Markdown"
 					sentMsg, err := bot.Send(msg)
@@ -77,9 +88,8 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 						fmt.Printf("发送新消息失败: %v\n", err)
 						return
 					}
-					*messageID = sentMsg.MessageID // 更新 messageID 为发送的消息ID
+					*messageID = sentMsg.MessageID
 				} else {
-					// 编辑已有消息
 					editMsg := tgbotapi.NewEditMessageText(chatID, *messageID, text)
 					editMsg.ParseMode = "Markdown"
 					if _, err := bot.Send(editMsg); err != nil {
@@ -87,7 +97,6 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 					}
 				}
 			} else {
-				// 发送新消息
 				msg := tgbotapi.NewMessage(chatID, text)
 				msg.ParseMode = "Markdown"
 				sentMsg, err := bot.Send(msg)
@@ -95,22 +104,24 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 					fmt.Printf("发送消息失败: %v\n", err)
 					return
 				}
-				*messageID = sentMsg.MessageID // 更新 messageID 为发送的消息ID
+				*messageID = sentMsg.MessageID
 			}
 		}
 	}
 
 	// 遍历主域名
-	for domainName, forwardingMap := range ALLDomain {
-		var port int
-		for _, details := range forwardingMap {
-			if value, ok := details["Port"].(int); ok {
-				port = value
-			}
-			break
+	for _, domainName := range orderedDomainNames {
+		domainEntries := grouped[domainName]
+		if len(domainEntries) == 0 {
+			continue
 		}
-		// 主域名连通性检测
+
+		// 获取端口
+		port := domainEntries[0].Port
+
 		var messageID int
+
+		// 检查主域名是否可连通
 		DomainIP, err := ResolveDomainToIP(domainName)
 		if err != nil {
 			fmt.Printf("主域名未进行配置解析: %s\n", err)
@@ -120,6 +131,7 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 
 		sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*开始检测域名:*`%s:%d`", domainName, port), &messageID, false, false)
 		fmt.Printf("开始检测域名:%s:%d\n", domainName, port)
+
 		if isConnected := CheckTCPConnectivity(DomainIP, port); isConnected {
 			sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*节点:*`%s:%d`*正常*", domainName, port), &messageID, true, false)
 			continue
@@ -127,16 +139,16 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 			sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*节点:*`%s:%d`*无法连通*", domainName, port), &messageID, true, true)
 		}
 
-		// 检测子域名连通性
+		// 转发域检测
 		var forwardingDomainInfo string
-		for forwardingDomain, details := range forwardingMap {
+		for _, item := range domainEntries {
+			forwardingDomain := item.ForwardingDomain
 			sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf("*开始检测转发域名:*`%s:%d`", forwardingDomain, port), &messageID, true, false)
-			ban, _ := details["Ban"].(bool)
-			if ban {
-				msg := fmt.Sprintf("-----\n*转发域名封禁:*`%s`, *IsBan:*`%t`\n", forwardingDomain, ban)
-				fmt.Printf(msg)
-				sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf(msg), &messageID, true, true)
-				// 将消息存储到 forwardingDomainInfo 中
+
+			if item.Ban {
+				msg := fmt.Sprintf("-----\n*转发域名封禁:*`%s`, *IsBan:*`%t`\n", forwardingDomain, item.Ban)
+				fmt.Print(msg)
+				sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
 				forwardingDomainInfo += msg
 				continue
 			}
@@ -144,27 +156,28 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 			forwardingIP, err := ResolveDomainToIP(forwardingDomain)
 			if err != nil {
 				msg := fmt.Sprintf("-----\n*转发域名解析错误:* `%s`, 错误: %s\n", forwardingDomain, err)
-				fmt.Printf(msg)
-				sendOrEditMessage(update.Message.Chat.ID, fmt.Sprintf(msg), &messageID, false, true)
+				fmt.Print(msg)
+				sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, false, true)
 				forwardingDomainInfo += msg
 				continue
 			}
+
 			fmt.Printf("开始检测转发域名:%s:%d\n", forwardingDomain, port)
 			if isConnected := CheckTCPConnectivity(forwardingIP, port); isConnected {
 				if _, err := UpdateARecord(domainName, forwardingIP); err != nil {
 					fmt.Printf("更新域名 A 记录失败: %s\n", err)
 					continue
 				}
+
 				if forwardingDomainInfo != "" {
-					msg := fmt.Sprintf("*域名A记录:*`%s`\n*转发域名:*`%s\n`*解析IP:*`%s`\n*运营商:*`%s`\n=====*异常的转发域:*=====\n%s=====", domainName, forwardingDomain, forwardingIP, details["ISP"], forwardingDomainInfo)
+					msg := fmt.Sprintf("*域名A记录:*`%s`\n*转发域名:*`%s`\n*解析IP:*`%s`\n*运营商:*`%s`\n=====*异常的转发域:*=====\n%s=====", domainName, forwardingDomain, forwardingIP, item.ISP, forwardingDomainInfo)
 					sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
 				} else {
-					msg := fmt.Sprintf("*域名A记录:*`%s`\n*转发域名:*`%s\n`*解析IP:*`%s`\n*运营商:*`%s`", domainName, forwardingDomain, forwardingIP, details["ISP"])
+					msg := fmt.Sprintf("*域名A记录:*`%s`\n*转发域名:*`%s`\n*解析IP:*`%s`\n*运营商:*`%s`", domainName, forwardingDomain, forwardingIP, item.ISP)
 					sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
 				}
 
-				ID := fmt.Sprintf("%v", details["ID"])
-				if _, err := repository.UpdateDomainIp(ID, forwardingIP); err != nil {
+				if _, err := repository.UpdateDomainIp(fmt.Sprintf("%d", item.ID), forwardingIP); err != nil {
 					fmt.Printf("更新数据库失败: %s\n", err)
 				} else {
 					fmt.Printf("数据库更新成功: %s -> %s\n", forwardingDomain, forwardingIP)
@@ -172,7 +185,7 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 				break
 			} else {
 				msg := fmt.Sprintf("-----\n*转发域名异常:* `%s:%d`\n", forwardingDomain, port)
-				fmt.Printf(msg)
+				fmt.Print(msg)
 				forwardingDomainInfo += msg
 			}
 		}
