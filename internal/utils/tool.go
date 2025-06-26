@@ -5,6 +5,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"telegrambot/config"
+	"telegrambot/internal/db/models"
+	"time"
 )
 
 func ValidateFormat(params string) (bool, error) {
@@ -43,4 +46,22 @@ func isValidDomain(domain string) bool {
 		return false
 	}
 	return match
+}
+
+func DomainInfoText(domainData models.Domain, Config *config.Config) (text string) {
+	ID := domainData.ID
+	Domain := domainData.Domain
+	ForwardingDomain := domainData.ForwardingDomain
+	IP := domainData.IP
+	Port := domainData.Port
+	ISP := domainData.ISP
+	Ban := domainData.Ban
+	BanTime := domainData.BanTime + Config.BanTime.UnBanTime
+	Weight := domainData.Weight
+	SortOrder := domainData.SortOrder
+	formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
+	messageText := fmt.Sprintf(
+		"ID: `%d`\n排序:`%d`\n权重: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`",
+		ID, SortOrder, Weight, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime)
+	return messageText
 }

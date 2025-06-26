@@ -10,6 +10,7 @@ import (
 	"telegrambot/internal/db"
 	"telegrambot/internal/db/repository"
 	"telegrambot/internal/services"
+	"telegrambot/internal/utils"
 	"time"
 )
 
@@ -34,21 +35,9 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			fmt.Println(err)
 			return
 		}
-		ID := DomainInfo.ID
-		Domain := DomainInfo.Domain
-		ForwardingDomain := DomainInfo.ForwardingDomain
-		IP := DomainInfo.IP
-		Port := DomainInfo.Port
-		ISP := DomainInfo.ISP
-		Ban := DomainInfo.Ban
-		BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
-		Weight := DomainInfo.Weight
+		DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
 		// 格式化消息内容，使用 Markdown 格式
-		formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
-		messageText := fmt.Sprintf(
-			"ID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`\n权重: `%d`",
-			ID, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime, Weight)
-
+		messageText := fmt.Sprintf(DomainInfoText)
 		fmt.Println(messageText)
 		msg := tgbotapi.NewEditMessageText(
 			update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
@@ -57,6 +46,8 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		)
 		msg.ParseMode = "Markdown"
 		// 创建按钮
+		ID := DomainInfo.ID
+		Ban := DomainInfo.Ban
 		msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 		_, err = bot.Send(msg)
 		fmt.Println("当前是1级菜单")
@@ -168,20 +159,10 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					fmt.Println("更新数据库IP失败", err)
 					return
 				}
-				ID := newDomainIp.ID
-				Domain := newDomainIp.Domain
-				ForwardingDomain := newDomainIp.ForwardingDomain
-				IP := newDomainIp.IP
-				Port := newDomainIp.Port
-				ISP := newDomainIp.ISP
-				Ban := newDomainIp.Ban
-				BanTime := newDomainIp.BanTime + Config.BanTime.UnBanTime
-				Weight := newDomainIp.Weight
-				formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
+				DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
 				// 格式化消息内容，使用 Markdown 格式
 				messageText = fmt.Sprintf(
-					"*获取最新IP成功*✅\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`\n权重: `%d`",
-					ID, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime, Weight) // 格式化消息内容，使用 Markdown 格式
+					"*获取最新IP成功*✅\n" + DomainInfoText) // 格式化消息内容，使用 Markdown 格式
 				fmt.Println(messageText)
 				msg = tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
@@ -190,6 +171,8 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				)
 				msg.ParseMode = "Markdown"
 				// 创建按钮
+				ID := newDomainIp.ID
+				Ban := newDomainIp.Ban
 				msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 				_, err = bot.Send(msg)
 			case "parse":
@@ -252,20 +235,10 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					fmt.Println("更新数据库IP失败", err)
 					return
 				}
-				ID := newDomainIp.ID
-				Domain := newDomainIp.Domain
-				ForwardingDomain := newDomainIp.ForwardingDomain
-				IP := newDomainIp.IP
-				Port := newDomainIp.Port
-				ISP := newDomainIp.ISP
-				Ban := newDomainIp.Ban
-				BanTime := newDomainIp.BanTime + Config.BanTime.UnBanTime
-				Weight := newDomainIp.Weight
-				formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
 				// 格式化消息内容，使用 Markdown 格式
+				DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
 				messageText = fmt.Sprintf(
-					"*解析成功*✅\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`\n权重: `%d`",
-					ID, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime, Weight) // 格式化消息内容，使用 Markdown 格式
+					"*解析成功*✅\n" + DomainInfoText) // 格式化消息内容，使用 Markdown 格式
 				fmt.Println(messageText)
 				msg = tgbotapi.NewEditMessageText(
 					update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
@@ -274,6 +247,8 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				)
 				msg.ParseMode = "Markdown"
 				// 创建按钮
+				ID := newDomainIp.ID
+				Ban := newDomainIp.Ban
 				msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 				_, err = bot.Send(msg)
 			case "checkAndParse":
@@ -402,20 +377,9 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 						fmt.Println(err)
 						return
 					}
-					ID := DomainInfo.ID
-					Domain := DomainInfo.Domain
-					ForwardingDomain := DomainInfo.ForwardingDomain
-					IP := DomainInfo.IP
-					Port := DomainInfo.Port
-					ISP := DomainInfo.ISP
-					Ban := DomainInfo.Ban
-					BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
-					Weight := DomainInfo.Weight
-					// 格式化消息内容，使用 Markdown 格式
-					formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
+					DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
 					messageText := fmt.Sprintf(
-						"解除封禁✅️\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`\n权重: `%d`",
-						ID, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime, Weight)
+						"解除封禁✅️\n" + DomainInfoText)
 					fmt.Println(messageText)
 					msg := tgbotapi.NewEditMessageText(
 						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
@@ -424,6 +388,8 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					)
 					msg.ParseMode = "Markdown"
 					// 创建按钮
+					ID := DomainInfo.ID
+					Ban := DomainInfo.Ban
 					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 					_, err = bot.Send(msg)
 				} else {
@@ -435,20 +401,9 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 						fmt.Println(err)
 						return
 					}
-					ID := DomainInfo.ID
-					Domain := DomainInfo.Domain
-					ForwardingDomain := DomainInfo.ForwardingDomain
-					IP := DomainInfo.IP
-					Port := DomainInfo.Port
-					ISP := DomainInfo.ISP
-					Ban := DomainInfo.Ban
-					BanTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
-					Weight := DomainInfo.Weight
-					// 格式化消息内容，使用 Markdown 格式
-					formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
+					DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
 					messageText := fmt.Sprintf(
-						"已封禁❌️\nID: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`\n权重: `%d`",
-						ID, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime, Weight)
+						"已封禁❌️\n" + DomainInfoText)
 					fmt.Println(messageText)
 					msg := tgbotapi.NewEditMessageText(
 						update.CallbackQuery.Message.Chat.ID,   // 原始消息的聊天 ID
@@ -457,6 +412,8 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 					)
 					msg.ParseMode = "Markdown"
 					// 创建按钮
+					ID := DomainInfo.ID
+					Ban := DomainInfo.Ban
 					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(ID, Ban)
 					_, err = bot.Send(msg)
 				}
@@ -628,40 +585,16 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				_, _ = bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprintf("✅ 权重设置成功：ID %s → 权重 %d", idStr, weight)))
 			} else {
 				// 计算解禁时间
-				banTime := DomainInfo.BanTime + Config.BanTime.UnBanTime
-				formattedTime := time.Unix(banTime, 0).Format("2006-01-02 15:04:05")
-
-				// 拼接详细消息文本
-				messageText := fmt.Sprintf(
-					"✅ 权重设置成功：ID %d → 权重 %d\n\n"+
-						"ID: `%d`\n"+
-						"域名: `%s`\n"+
-						"转发域名: `%s`\n"+
-						"IP: `%s`\n"+
-						"端口: `%d`\n"+
-						"运营商: `%s`\n"+
-						"IsBan: `%t`\n"+
-						"解禁时间: `%s`\n"+
-						"权重: `%d`",
-					DomainInfo.ID, weight,
-					DomainInfo.ID,
-					DomainInfo.Domain,
-					DomainInfo.ForwardingDomain,
-					DomainInfo.IP,
-					DomainInfo.Port,
-					DomainInfo.ISP,
-					DomainInfo.Ban,
-					formattedTime,
-					DomainInfo.Weight)
-
+				DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
+				HeadText := fmt.Sprintf("✅ 权重设置成功：ID %d → 权重 %d\n", DomainInfo.ID, weight)
 				promptMsg, ok := userLastPromptMessage[userID]
 				if !ok {
-					msg := tgbotapi.NewMessage(chatID, messageText)
+					msg := tgbotapi.NewMessage(chatID, HeadText+DomainInfoText)
 					msg.ParseMode = "Markdown" // 这里设置 Markdown 解析
 					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(DomainInfo.ID, DomainInfo.Ban)
 					_, _ = bot.Send(msg)
 				} else {
-					edit := tgbotapi.NewEditMessageText(promptMsg.Chat.ID, promptMsg.MessageID, messageText)
+					edit := tgbotapi.NewEditMessageText(promptMsg.Chat.ID, promptMsg.MessageID, HeadText+DomainInfoText)
 					edit.ParseMode = "Markdown" // 这里也设置
 					edit.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(DomainInfo.ID, DomainInfo.Ban)
 					_, _ = bot.Send(edit)
