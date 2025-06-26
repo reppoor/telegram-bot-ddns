@@ -29,7 +29,7 @@ func GetDomainInfo() ([]models.Domain, error) {
 
 	// 按 ID 排序
 	sort.Slice(domains, func(i, j int) bool {
-		return domains[i].ID < domains[j].ID
+		return domains[i].SortOrder > domains[j].SortOrder
 	})
 
 	return domains, nil

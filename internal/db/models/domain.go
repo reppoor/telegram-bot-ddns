@@ -12,6 +12,7 @@ type Domain struct {
 	Del              bool   `gorm:"default:false"` // 是否删除
 	Weight           int    `gorm:"default:0"`     // 权重，默认值为0
 	BanTime          int64  `gorm:"default:0"`     // 记录封禁时的 Unix 时间戳，0 表示未封禁或未记录
+	SortOrder        int    `gorm:"default:0"`     // 排序权重
 
 }
 type TelegramPermission struct {
