@@ -489,7 +489,7 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				// 第一步：生成消息文本和按钮
 				text := "请选择删除的转发记录\n" +
 					"✅️=删除\n" +
-					"🚫=不删" // 或你要显示的文本
+					"❌=不删" // 或你要显示的文本
 				keyboardMarkup := keyboard.GenerateMainMenuDeleteKeyboard(GetDomainInfo)
 
 				// 第二步：编辑消息文本

@@ -48,7 +48,7 @@ func isValidDomain(domain string) bool {
 	return match
 }
 
-func DomainInfoText(domainData models.Domain, Config *config.Config) (text string) {
+func DomainInfoText(domainData models.Domain, Config *config.Config) string {
 	ID := domainData.ID
 	Domain := domainData.Domain
 	ForwardingDomain := domainData.ForwardingDomain
@@ -60,8 +60,33 @@ func DomainInfoText(domainData models.Domain, Config *config.Config) (text strin
 	Weight := domainData.Weight
 	SortOrder := domainData.SortOrder
 	formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
+
+	// 状态
+	banStatus := "✅ 启用中"
+	if Ban {
+		banStatus = "⛔ 已封禁"
+	}
+
 	messageText := fmt.Sprintf(
-		"ID: `%d`\n排序:`%d`\n权重: `%d`\n域名: `%s`\n转发域名: `%s`\nIP: `%s`\n端口: `%d`\n运营商: `%s`\nIsBan: `%t`\n解禁时间: `%s`",
-		ID, SortOrder, Weight, Domain, ForwardingDomain, IP, Port, ISP, Ban, formattedTime)
+		"*📌 基本信息*\n"+
+			"• *ID*：`%d`\n"+
+			"• *排序*：`%d`\n"+
+			"• *权重*：`%d`\n"+
+			"——————————————\n"+
+			"*🌐 域名信息*\n"+
+			"• *域名*：`%s`\n"+
+			"• *转发域名*：`%s`\n"+
+			"• *IP地址*：`%s`\n"+
+			"• *端口*：`%d`\n"+
+			"• *运营商*：`%s`\n"+
+			"——————————————\n"+
+			"*🚦 状态信息*\n"+
+			"• *当前状态*：%s\n"+
+			"• *解封时间*：`%s`",
+		ID, SortOrder, Weight,
+		Domain, ForwardingDomain, IP, Port, ISP,
+		banStatus, formattedTime,
+	)
+
 	return messageText
 }
