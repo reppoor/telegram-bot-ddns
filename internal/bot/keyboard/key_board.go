@@ -97,37 +97,39 @@ func GenerateMainMenuDeleteKeyboard(domains []models.Domain) tgbotapi.InlineKeyb
 }
 
 func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
-	// 设置封禁状态按钮文本
-	BanText := "✅ 启用中"
+	// 封禁状态按钮文本
+	banText := "✅ 启用中"
 	if Ban {
-		BanText = "⛔ 已封禁"
+		banText = "⛔ 已封禁"
 	}
 
-	// 分组按钮行
+	// 第一行：状态相关按钮，拆成两行，减少拥挤
 	row1 := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData(BanText, fmt.Sprintf("%d-ban", ID)),
-		tgbotapi.NewInlineKeyboardButtonData("⚙️ 设置权重", fmt.Sprintf("%d-weight", ID)),
-		tgbotapi.NewInlineKeyboardButtonData("↕️ 设置排序", fmt.Sprintf("%d-sort", ID)),
+		tgbotapi.NewInlineKeyboardButtonData(banText, fmt.Sprintf("%d-ban", ID)),
+		tgbotapi.NewInlineKeyboardButtonData("⚙️ 权重", fmt.Sprintf("%d-weight", ID)),
+	)
+	row2 := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("↕️ 排序", fmt.Sprintf("%d-sort", ID)),
 	)
 
-	row2 := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("🌐 获取最新IP", fmt.Sprintf("%d-getIp", ID)),
+	// 第二组：解析相关操作
+	row3 := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("🌐 获取IP", fmt.Sprintf("%d-getIp", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("📡 解析记录", fmt.Sprintf("%d-parse", ID)),
 	)
-
-	row3 := tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("🔄 检测并解析", fmt.Sprintf("%d-checkAndParse", ID)),
+	row4 := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("🔄 检测解析", fmt.Sprintf("%d-checkAndParse", ID)),
 	)
 
-	row4 := tgbotapi.NewInlineKeyboardRow(
+	// 第三组：删除和退出操作
+	row5 := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("❌ 删除记录", fmt.Sprintf("%d-del", ID)),
 	)
-
-	row5 := tgbotapi.NewInlineKeyboardRow(
+	row6 := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("🔙 返回", fmt.Sprintf("%d-back", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("🔚 退出", fmt.Sprintf("%d-exit", ID)),
 	)
 
-	keyboard := tgbotapi.NewInlineKeyboardMarkup(row1, row2, row3, row4, row5)
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(row1, row2, row3, row4, row5, row6)
 	return &keyboard
 }
