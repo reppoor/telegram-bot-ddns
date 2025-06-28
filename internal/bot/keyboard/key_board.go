@@ -93,7 +93,7 @@ func GenerateMainMenuDeleteKeyboard(domains []models.Domain) tgbotapi.InlineKeyb
 		keyboard.Buttons = append(keyboard.Buttons, []Button{button})
 	}
 
-	return createInlineKeyboard(keyboard, 1) // 1列单排
+	return createInlineKeyboard(keyboard, 2) // 1列单排
 }
 
 func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
@@ -107,6 +107,7 @@ func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
 	row1 := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData(BanText, fmt.Sprintf("%d-ban", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("⚙️ 设置权重", fmt.Sprintf("%d-weight", ID)),
+		tgbotapi.NewInlineKeyboardButtonData("↕️ 设置排序", fmt.Sprintf("%d-sort", ID)),
 	)
 
 	row2 := tgbotapi.NewInlineKeyboardRow(

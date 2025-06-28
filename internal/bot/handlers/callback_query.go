@@ -56,6 +56,22 @@ func CallbackQuery(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			ID := levels[0]
 			action := levels[1]
 			switch action {
+			case "sort":
+				fmt.Println("设置排序, sort:", ID)
+				userID := update.CallbackQuery.From.ID
+				chatID := update.CallbackQuery.Message.Chat.ID
+				messageID := update.CallbackQuery.Message.MessageID
+
+				userState[userID] = "awaiting_sort_input"
+				userMeta[userID] = map[string]string{"id": ID}
+
+				editMsg := tgbotapi.NewEditMessageText(chatID, messageID, fmt.Sprintf("你正在为 ID `%s` 设置排序，请发送新的排序值（整数）", ID))
+				editMsg.ParseMode = "Markdown"
+
+				sentMsg, err := bot.Send(editMsg)
+				if err == nil {
+					userLastPromptMessage[userID] = sentMsg
+				}
 			case "weight":
 				fmt.Println("设置权重, weight:", ID)
 				userID := update.CallbackQuery.From.ID
@@ -606,5 +622,47 @@ func HandleMessage(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			delete(userState, userID)
 			delete(userMeta, userID)
 		}
+	case "awaiting_sort_input":
+		db.InitDB()
+		weight, err := strconv.Atoi(text)
+		if err != nil {
+			_, _ = bot.Send(tgbotapi.NewMessage(chatID, "⚠️ 请输入有效的整数作为排序"))
+			return
+		}
+
+		idStr := userMeta[userID]["id"]
+
+		_, err = repository.UpdateDomainSortOrder(idStr, weight)
+		if err != nil {
+			_, _ = bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprintf("❌ 排序更新失败：%v", err)))
+		} else {
+			DomainInfo, err := repository.GetDomainIDInfo(idStr)
+			if err != nil {
+				// 查询失败，发普通成功提示
+				_, _ = bot.Send(tgbotapi.NewMessage(chatID, fmt.Sprintf("✅ 排序设置成功：ID %s → 排序 %d", idStr, weight)))
+			} else {
+				// 计算解禁时间
+				DomainInfoText := utils.DomainInfoText(DomainInfo, Config)
+				HeadText := fmt.Sprintf("✅ 排序设置成功：ID %d → 排序 %d\n", DomainInfo.ID, weight)
+				promptMsg, ok := userLastPromptMessage[userID]
+				if !ok {
+					msg := tgbotapi.NewMessage(chatID, HeadText+DomainInfoText)
+					msg.ParseMode = "Markdown" // 这里设置 Markdown 解析
+					msg.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(DomainInfo.ID, DomainInfo.Ban)
+					_, _ = bot.Send(msg)
+				} else {
+					edit := tgbotapi.NewEditMessageText(promptMsg.Chat.ID, promptMsg.MessageID, HeadText+DomainInfoText)
+					edit.ParseMode = "Markdown" // 这里也设置
+					edit.ReplyMarkup = keyboard.GenerateSubMenuKeyboard(DomainInfo.ID, DomainInfo.Ban)
+					_, _ = bot.Send(edit)
+					delete(userLastPromptMessage, userID)
+				}
+			}
+
+			// 清理用户状态
+			delete(userState, userID)
+			delete(userMeta, userID)
+		}
+
 	}
 }

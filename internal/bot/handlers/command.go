@@ -34,7 +34,14 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 		case "id":
 			fmt.Printf("id命令\n")
 			// 格式化消息内容，使用 Markdown 格式
-			messageText := fmt.Sprintf("用户ID: `%d`\n名字: `%s`\n姓氏: `%s`\n用户名: [%s](https://t.me/%s)\n语言设置: `%s`", ID, FirstName, LastName, UserName, UserName, LanguageCode) // 格式化消息内容，使用 Markdown 格式
+			messageText := fmt.Sprintf(
+				"*👤 用户信息:*\n\n"+
+					"*🆔 用户ID:* `%d`\n"+
+					"*🧑 名字:* `%s`\n"+
+					"*👨‍🦱 姓氏:* `%s`\n"+
+					"*🔗 用户名:* [%s](https://t.me/%s)\n"+
+					"*🌐 语言设置:* `%s`",
+				ID, FirstName, LastName, UserName, UserName, LanguageCode)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
@@ -133,15 +140,17 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			// 参数格式验证
 			_, err := utils.ValidateFormat(params)
 			if err != nil {
-				messageText := fmt.Sprintf("*请参考格式:*\n"+
-					"*格式说明:*\n"+
-					"`主域名#转发域名#转发端口#运营商`\n"+
-					"*单条记录格式:*\n"+
-					"`www.baidu.com#www.hao123.com#7890#运营商`\n"+
-					"*批量记录格式转发域名用`|`分隔:*\n"+
-					"`www.baidu.com#www.hao123.com|www.4399.com#7890#运营商A|运营商B`\n"+
-					"*非法格式详情:*\n"+
-					"`%s`", err) // 格式化消息内容，使用 Markdown 格式
+				messageText := fmt.Sprintf(
+					"*📌 请参考以下格式:*\n\n"+
+						"*📝 格式说明:*\n"+
+						"`主域名#转发域名#转发端口#运营商`\n\n"+
+						"*📍 单条记录示例:*\n"+
+						"`www.baidu.com#www.hao123.com#7890#运营商`\n\n"+
+						"*📦 批量记录示例（转发域名用 `|` 分隔）:*\n"+
+						"`www.baidu.com#www.hao123.com|www.4399.com#7890#运营商A|运营商B`\n\n"+
+						"*❗️检测到的非法格式:*\n"+
+						"`%s`",
+					err)
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -214,9 +223,9 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 		case "parse":
-			fmt.Printf("parse命令\n")
+			fmt.Println("parse命令")
 			if ID != Config.Telegram.Id {
-				messageText := "`您无法使用parse命令`"
+				messageText := "*🚫 您无权限使用该命令*"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
@@ -225,21 +234,18 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 
 			db.InitDB()
 
-			// 获取所有域名信息，假设按ID排序
 			allDomains, err := repository.GetDomainInfo()
 			if err != nil {
 				fmt.Println("获取域名信息失败:", err)
-				messageText := fmt.Sprintf("数据库未查询到任何域名记录❌️") // 格式化消息内容，使用 Markdown 格式
+				messageText := "*❌ 数据库未查询到任何域名记录*"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
 				return
 			}
 
-			// 用切片和map记录去重的主域名，保证顺序固定
 			var orderedDomains []string
 			domainSet := make(map[string]struct{})
-
 			for _, d := range allDomains {
 				if _, exists := domainSet[d.Domain]; !exists {
 					domainSet[d.Domain] = struct{}{}
@@ -248,7 +254,6 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 			}
 
 			var domainInfoList []string
-
 			for _, domainName := range orderedDomains {
 				info, err := services.GetDomainInfo(domainName)
 				if err != nil {
@@ -257,62 +262,68 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				}
 
 				infoString := fmt.Sprintf(
-					"域名:`%s`\n转发域:`%s`\nIP:`%s`\n运营商:`%s`",
+					"🌐 *域名:* `%s`\n🔀 *转发域:* `%s`\n📥 *IP:* `%s`\n🏢 *运营商:* `%s`",
 					info.Domain, info.ForwardingDomain, info.IP, info.ISP,
 				)
 				domainInfoList = append(domainInfoList, infoString)
 			}
 
-			finalSentence := strings.Join(domainInfoList, "\n----------\n")
+			finalSentence := strings.Join(domainInfoList, "\n\n──────────────\n\n")
 			if finalSentence == "" {
-				finalSentence = "_没有可用的域名数据_"
+				finalSentence = "_⚠️ 没有可用的域名解析记录_"
 			}
 
-			messageText := "*当前cloudflare的解析*:\n\n" + finalSentence
+			messageText := "*📦 当前 Cloudflare 解析情况:*\n\n" + finalSentence
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			_, _ = bot.Send(msg)
 		case "getip":
-			fmt.Printf("getip命令\n")
+			fmt.Println("getip命令")
 			if ID != Config.Telegram.Id {
-				messageText := fmt.Sprintf("`您无法使用getIp命令`") // 格式化消息内容，使用 Markdown 格式
+				messageText := "*🚫 无权限使用 getIp 命令*"
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 				msg.ParseMode = "Markdown"
 				_, _ = bot.Send(msg)
 				return
 			}
-			messageText := fmt.Sprintf("`处理进度: %s\n开始写入转发IP...`", "0%") // 格式化消息内容，使用 Markdown 格式
+
+			messageText := "*📡 开始处理域名解析*\n\n" +
+				"处理进度: `0%%`\n" +
+				"_正在写入转发 IP，请稍候..._"
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 			msg.ParseMode = "Markdown"
 			sentMessage, _ := bot.Send(msg)
-			// 连接数据库
+
+			// 初始化数据库
 			db.InitDB()
-			// 获取所有域名信息
+
+			// 获取域名数据
 			Domains, err := repository.GetALLDomain()
 			if err != nil {
 				fmt.Println("获取域名信息失败:", err)
-				messageText = fmt.Sprintf("`获取域名信息失败`") // 格式化消息内容，使用 Markdown 格式
+				messageText = "*❗️ 获取域名信息失败!*"
 				msg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
 				msg.ParseMode = "Markdown"
-				sentMessage, _ = bot.Send(msg)
+				_, _ = bot.Send(msg)
 				return
 			}
+
 			if Domains == nil {
 				log.Println("没有任何域名数据")
-				messageText = fmt.Sprintf("`没有任何域名数据`") // 格式化消息内容，使用 Markdown 格式
+				messageText = "*⚠️ 没有任何域名数据可处理*"
 				msg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
 				msg.ParseMode = "Markdown"
-				sentMessage, _ = bot.Send(msg)
+				_, _ = bot.Send(msg)
 				return
 			}
-			// 获取总域名数量
+
 			totalDomains := len(Domains)
 
-			// 遍历 domains 列表
+			// 遍历并处理域名
 			for i, domain := range Domains {
 				newIP, err := services.ResolveDomainToIP(domain.ForwardingDomain)
 				if err != nil {
-					messageText := fmt.Sprintf("域名:`%s`解析IP失败", domain.ForwardingDomain)
+					messageText := fmt.Sprintf("*❌ 域名解析失败*\n`%s` 无法解析 IP", domain.ForwardingDomain)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 					msg.ParseMode = "Markdown"
 					_, _ = bot.Send(msg)
@@ -322,23 +333,32 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 				idStr := fmt.Sprintf("%d", domain.ID)
 				_, err = repository.UpdateDomainIp(idStr, newIP)
 				if err != nil {
-					messageText := fmt.Sprintf("域名:`%s`更新到数据库失败", domain.ForwardingDomain)
+					messageText := fmt.Sprintf("*⚠️ 数据库更新失败*\n域名: `%s`\n目标 IP: `%s`", domain.ForwardingDomain, newIP)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 					msg.ParseMode = "Markdown"
 					_, _ = bot.Send(msg)
 					continue
 				}
 
-				// 计算进度
 				progress := int(float64(i+1) / float64(totalDomains) * 100)
 
-				// 创建更新的消息内容
-				var messageText string
 				if progress == 100 {
-					messageText = fmt.Sprintf("已完成: `%d%%`\n域名:`%s`\n转发IP:`%s`\n更新成功✅️", progress, domain.ForwardingDomain, newIP)
+					messageText = fmt.Sprintf(
+						"*✅ 所有域名处理完成*\n\n"+
+							"共处理域名: *%d*\n"+
+							"最后一项:\n"+
+							"🌐 `%s`\n"+
+							"📥 IP: `%s`",
+						totalDomains, domain.ForwardingDomain, newIP)
 				} else {
-					messageText = fmt.Sprintf("处理进度: `%d%%`\n域名:`%s`\n转发IP:`%s`\n更新成功✅️", progress, domain.ForwardingDomain, newIP)
+					messageText = fmt.Sprintf(
+						"*🔁 处理进度:* `%d%%`\n"+
+							"*🌐 域名:* `%s`\n"+
+							"*📥 新转发 IP:* `%s`\n"+
+							"✅ 更新成功",
+						progress, domain.ForwardingDomain, newIP)
 				}
+
 				editProgressMsg := tgbotapi.NewEditMessageText(update.Message.Chat.ID, sentMessage.MessageID, messageText)
 				editProgressMsg.ParseMode = "Markdown"
 				_, _ = bot.Send(editProgressMsg)

@@ -1,5 +1,5 @@
 package services
 
 func Version() (v string) {
-	return "`当前BOT运行版本:dev1.0.7`"
+	return "———————\n*📦 BOT 版本信息*\n———————\n版本号: `dev1.0.7`"
 }
