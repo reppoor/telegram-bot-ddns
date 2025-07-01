@@ -136,6 +136,8 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 		var forwardingDomainInfo string
 		for _, item := range domainEntries {
 			forwardingDomain := item.ForwardingDomain
+			ISP := item.ISP
+			RecordType := item.RecordType
 			sendOrEditMessage(update.Message.Chat.ID,
 				fmt.Sprintf("*🔍 检测转发域名:* `%s:%d` (权重: `%d`)", forwardingDomain, port, item.Weight), &messageID, true, false)
 			if item.Ban {
@@ -154,19 +156,35 @@ func ALLCheckTCPConnectivity(bot *tgbotapi.BotAPI, update tgbotapi.Update, shoul
 				continue
 			}
 			if isConnected := CheckTCPConnectivity(forwardingIP, port); isConnected {
-				if _, err := UpdateARecord(domainName, forwardingIP); err != nil {
-					fmt.Printf("更新域名 A 记录失败: %s\n", err)
-					continue
-				}
-				msg := fmt.Sprintf("*✅ 成功切换 A 记录*\n🌐 *主域名:* `%s`\n🔀 *转发域名:* `%s`\n📥 *解析IP:* `%s`\n🏢 *运营商:* `%s`\n%s",
-					domainName, forwardingDomain, forwardingIP, item.ISP, forwardingDomainInfo)
-				sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
-				if _, err := repository.UpdateDomainIp(fmt.Sprintf("%d", item.ID), forwardingIP); err != nil {
-					fmt.Printf("更新数据库失败: %s\n", err)
+				if RecordType {
+					if _, err := UpdateARecord(domainName, forwardingIP, ISP); err != nil {
+						fmt.Printf("更新域名 A 记录失败: %s\n", err)
+						continue
+					}
+					msg := fmt.Sprintf("*✅ 成功切换 A 记录*\n🌐 *主域名:* `%s`\n🔀 *转发域名:* `%s`\n📥 *解析IP:* `%s`\n🏢 *运营商:* `%s`\n%s",
+						domainName, forwardingDomain, forwardingIP, item.ISP, forwardingDomainInfo)
+					sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
+					if _, err := repository.UpdateDomainIp(fmt.Sprintf("%d", item.ID), forwardingIP); err != nil {
+						fmt.Printf("更新数据库失败: %s\n", err)
+					} else {
+						fmt.Printf("数据库更新成功: %s -> %s\n", forwardingDomain, forwardingIP)
+					}
+					break
 				} else {
-					fmt.Printf("数据库更新成功: %s -> %s\n", forwardingDomain, forwardingIP)
+					if _, err := UpdateCNAMERecord(domainName, forwardingDomain, ISP); err != nil {
+						fmt.Printf("更新域名 CNAME 记录失败: %s\n", err)
+						continue
+					}
+					msg := fmt.Sprintf("*✅ 成功切换 CNAME 记录*\n🌐 *主域名:* `%s`\n🔀 *转发域名:* `%s`\n📥 *解析IP:* `%s`\n🏢 *运营商:* `%s`\n%s",
+						domainName, forwardingDomain, forwardingIP, item.ISP, forwardingDomainInfo)
+					sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)
+					if _, err := repository.UpdateDomainIp(fmt.Sprintf("%d", item.ID), forwardingIP); err != nil {
+						fmt.Printf("更新数据库失败: %s\n", err)
+					} else {
+						fmt.Printf("数据库更新成功: %s -> %s\n", forwardingDomain, forwardingIP)
+					}
+					break
 				}
-				break
 			} else {
 				msg := fmt.Sprintf("❌ *转发域名不可达:* `%s:%d`\n(权重: `%d`)\n➡️ 已封禁\n", forwardingDomain, port, item.Weight)
 				sendOrEditMessage(update.Message.Chat.ID, msg, &messageID, true, true)

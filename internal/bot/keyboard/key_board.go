@@ -106,9 +106,10 @@ func GenerateSubMenuKeyboard(ID uint, Ban bool) *tgbotapi.InlineKeyboardMarkup {
 	// 第一行：状态相关按钮，拆成两行，减少拥挤
 	row1 := tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData(banText, fmt.Sprintf("%d-ban", ID)),
-		tgbotapi.NewInlineKeyboardButtonData("⚙️ 权重", fmt.Sprintf("%d-weight", ID)),
+		tgbotapi.NewInlineKeyboardButtonData("✏️记录变更", fmt.Sprintf("%d-record", ID)),
 	)
 	row2 := tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("⚙️ 权重", fmt.Sprintf("%d-weight", ID)),
 		tgbotapi.NewInlineKeyboardButtonData("↕️ 排序", fmt.Sprintf("%d-sort", ID)),
 	)
 

@@ -59,6 +59,7 @@ func DomainInfoText(domainData models.Domain, Config *config.Config) string {
 	BanTime := domainData.BanTime + Config.BanTime.UnBanTime
 	Weight := domainData.Weight
 	SortOrder := domainData.SortOrder
+	RecordType := domainData.RecordType // 假设是 bool 类型
 	formattedTime := time.Unix(BanTime, 0).Format("2006-01-02 15:04:05")
 
 	// 状态
@@ -67,11 +68,18 @@ func DomainInfoText(domainData models.Domain, Config *config.Config) string {
 		banStatus = "⛔ 已封禁"
 	}
 
+	// 记录类型
+	recordTypeText := "CNAME记录"
+	if RecordType {
+		recordTypeText = "A记录"
+	}
+
 	messageText := fmt.Sprintf(
 		"*📌 基本信息*\n"+
 			"• *ID*：`%d`\n"+
 			"• *排序*：`%d`\n"+
 			"• *权重*：`%d`\n"+
+			"• *记录类型*：`%s`\n"+ // ✅ 新增这一行
 			"——————————————\n"+
 			"*🌐 域名信息*\n"+
 			"• *域名*：`%s`\n"+
@@ -83,7 +91,7 @@ func DomainInfoText(domainData models.Domain, Config *config.Config) string {
 			"*🚦 状态信息*\n"+
 			"• *当前状态*：%s\n"+
 			"• *解封时间*：`%s`",
-		ID, SortOrder, Weight,
+		ID, SortOrder, Weight, recordTypeText,
 		Domain, ForwardingDomain, IP, Port, ISP,
 		banStatus, formattedTime,
 	)

@@ -3,7 +3,10 @@
 
 [telegram频道](https://t.me/ddns_reppoor)
 # 一款Telegram动态域名解析机器人
-仅支持IPV4，IPV6请绕道
+#### 支持
+(A记录、CNAME记录）
+
+IPV6请绕道
 
 仅接受cloudflare托管的域名
 

@@ -98,7 +98,7 @@ func UpdateDomainIp(ID string, newIP string) (models.Domain, error) {
 
 	// 更新IP地址
 	domain.IP = newIP
-	updateResult := db.DB.Save(&domain)
+	updateResult := db.DB.Model(&domain).Update("ip", newIP)
 	if updateResult.Error != nil {
 		fmt.Printf("更新失败: %v\n", updateResult.Error)
 		return models.Domain{}, updateResult.Error
@@ -178,6 +178,44 @@ func UpdateDomainBan(ID string, Ban bool) (models.Domain, error) {
 
 	// 更新Ban状态地址
 	domain.Ban = Ban
+	updateResult := db.DB.Save(&domain)
+	if updateResult.Error != nil {
+		fmt.Printf("更新失败: %v\n", updateResult.Error)
+		return models.Domain{}, updateResult.Error
+	}
+
+	// 返回更新后的记录
+	return domain, nil
+}
+
+func UpdateDomainRecordType(ID string, RecordType bool) (models.Domain, error) {
+	// 初始化默认值
+	var numericID = ID
+
+	// 检查并提取 ID 的数字部分（如果包含 "-"）
+	if strings.Contains(ID, "-") {
+		idParts := strings.Split(ID, "-")
+		if len(idParts) > 0 {
+			numericID = idParts[0] // 提取 "-" 前的部分
+		}
+	}
+	// 转换字符串 ID 为 uint 类型
+	uintID, err := strconv.ParseUint(numericID, 10, 32) // 将字符串ID转换为uint类型
+	if err != nil {
+		fmt.Printf("无效的ID格式: %v\n", err)
+		return models.Domain{}, err
+	}
+
+	// 查找目标域名记录
+	var domain models.Domain
+	result := db.DB.First(&domain, uint(uintID))
+	if result.Error != nil {
+		fmt.Printf("查询失败: %v\n", result.Error)
+		return models.Domain{}, result.Error
+	}
+
+	// 更新Ban状态地址
+	domain.RecordType = RecordType
 	updateResult := db.DB.Save(&domain)
 	if updateResult.Error != nil {
 		fmt.Printf("更新失败: %v\n", updateResult.Error)

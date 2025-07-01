@@ -255,15 +255,20 @@ func HandleCommand(bot *tgbotapi.BotAPI, update tgbotapi.Update, Config *config.
 
 			var domainInfoList []string
 			for _, domainName := range orderedDomains {
-				info, err := services.GetDomainInfo(domainName)
+				info, err := services.GetCloudflareDomainInfo(domainName)
 				if err != nil {
 					log.Printf("获取域名 %s 信息失败: %v\n", domainName, err)
 					continue
 				}
 
+				recordTypeText := "CNAME记录"
+				if info.RecordType {
+					recordTypeText = "A记录"
+				}
+
 				infoString := fmt.Sprintf(
-					"🌐 *域名:* `%s`\n🔀 *转发域:* `%s`\n📥 *IP:* `%s`\n🏢 *运营商:* `%s`",
-					info.Domain, info.ForwardingDomain, info.IP, info.ISP,
+					"🌐 *域名:* `%s`\n🔀 *转发域:* `%s`\n✏️ *记录类型:* `%s`\n📥 *IP:* `%s`\n🏢 *运营商:* `%s`",
+					info.Domain, info.ForwardingDomain, recordTypeText, info.IP, info.ISP,
 				)
 				domainInfoList = append(domainInfoList, infoString)
 			}

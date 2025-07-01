@@ -13,8 +13,9 @@ type Domain struct {
 	Weight           int    `gorm:"default:0"`     // 权重，默认值为0
 	BanTime          int64  `gorm:"default:0"`     // 记录封禁时的 Unix 时间戳，0 表示未封禁或未记录
 	SortOrder        int    `gorm:"default:0"`     // 排序权重
-
+	RecordType       bool   `gorm:"default:true"`  // 是否为A记录
 }
+
 type TelegramPermission struct {
 	ID         uint   `gorm:"primaryKey"`        // 主键
 	TelegramID string `gorm:"size:255;not null"` // TelegramID
